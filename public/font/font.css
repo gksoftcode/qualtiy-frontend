@@ -1,0 +1,20 @@
+@font-face {
+  font-family: bukrabold;
+  src: url(Bukra/TTF/29ltbukrabold.ttf), url(Bukra/EOT/29ltbukrabold.eot);
+}
+
+@font-face {
+  font-family: bukrabolditalic;
+  src: url(Bukra/TTF/29ltbukrabolditalic.ttf),
+    url(Bukra/EOT/29ltbukrabolditalic.eot);
+}
+
+@font-face {
+  font-family: bukralight;
+  src: url(Bukra/TTF/29ltbukralight.ttf), url(Bukra/EOT/29ltbukralight.eot);
+}
+
+@font-face {
+  font-family: bukraregular;
+  src: url(Bukra/TTF/29ltbukraregular.ttf), url(Bukra/EOT/29ltbukraregular.eot);
+}

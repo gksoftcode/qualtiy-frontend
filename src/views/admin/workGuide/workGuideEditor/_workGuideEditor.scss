@@ -1,0 +1,26 @@
+.workGuideEditor {
+
+}
+.definitionTitle{
+  font-weight: bold;
+  font-size: 1.1em;
+  color: var(--v-primary-base);
+}
+.procedure-title{
+  font-weight: bold;
+  color: var(--v-accent-base);
+}
+.header-procedure-responsibility{
+  writing-mode: tb-rl;
+}
+.ghost {
+  opacity: 0.5;
+}
+.sortable-chosen{
+  background-color: var(--v-accent-base) !important;
+  opacity: 0.5;
+  padding-right: 100px;
+}
+.flip-list-move {
+  transition: transform 0.5s;
+}
