@@ -112,9 +112,10 @@ export default {
       }
       this.dataTableRequest.data = {
         employeeNumber: this.employeeNumber,
-        employeeName: this.employeeName
+        employeeName: this.employeeName,
+        departmentId: this.department.id
       }
-      EmployeeService.search(this.dataTableRequest)
+      EmployeeService.searchByDepartment(this.dataTableRequest)
         .then(response => {
           this.tableResponse = response.data
           this.loading = false

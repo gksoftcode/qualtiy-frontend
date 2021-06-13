@@ -294,147 +294,161 @@
                 </v-btn>
               </legend>
               <template v-for="proc in selected.procedures">
-                <v-row dense :key="proc.id">
-                  <v-col cols="11">
-                    <span
-                      class="procedure-title"
-                      v-text="proc.description"
-                    ></span>
-                    <v-btn icon color="primary" @click="createNewStep(proc)">
-                      <v-icon>
-                        mdi-plus-circle
-                      </v-icon>
-                    </v-btn>
-                  </v-col>
-                  <v-col cols="1">
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on, attrs }">
+                <v-card class="mb-2" :key="proc.id">
+                  <v-card-text>
+                    <v-row dense>
+                      <v-col cols="11">
+                        <span
+                          class="procedure-title"
+                          v-text="proc.description"
+                        ></span>
                         <v-btn
                           icon
-                          color="green lighten-1"
-                          @click="editProcedure(proc)"
-                          v-bind="attrs"
-                          v-on="on"
+                          color="primary"
+                          @click="createNewStep(proc)"
                         >
-                          <v-icon>mdi-square-edit-outline</v-icon>
+                          <v-icon>
+                            mdi-plus-circle
+                          </v-icon>
                         </v-btn>
-                      </template>
-                      <span>تحرير</span>
-                    </v-tooltip>
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          dark
-                          icon
-                          color="red darken-2"
-                          @click="deleteProcedure(proc)"
-                          v-bind="attrs"
-                          v-on="on"
-                        >
-                          <v-icon> mdi-trash-can-outline</v-icon>
-                        </v-btn>
-                      </template>
-                      <span>حذف</span>
-                    </v-tooltip>
-                  </v-col>
-                  <v-col cols="12">
-                    <v-data-table
-                      dense
-                      :headers="procedureHeader"
-                      :items="proc.steps"
-                    >
-                      <template v-slot:item.orderNo="{ item }">
-                        <v-text-field
-                          dense
-                          type="number"
-                          v-model="item.orderNo"
-                        ></v-text-field>
-                      </template>
-                      <template v-slot:item.description="{ item }">
-                        <v-textarea
-                          dense
-                          rows="1"
-                          v-model="item.description"
-                        ></v-textarea>
-                      </template>
-                      <template v-slot:item.remarks="{ item }">
-                        <v-textarea
-                          rows="1"
-                          dense
-                          v-model="item.remarks"
-                        ></v-textarea>
-                      </template>
-                      <template v-slot:item.files="{ item }">
-                        <v-row dense>
-                          <v-btn icon @click="showFilesDlg(item)">
-                            <v-icon color="primary">
-                              mdi-link-plus
-                            </v-icon>
-                          </v-btn>
-                          <v-col
-                            cols="12"
-                            v-for="file in item.files"
-                            :key="file.name"
-                          >
-                            <span v-text="file.name"></span>
-                            <v-icon
-                              dark
-                              class="mdi-18px float-left"
-                              color="red lighten-1"
-                              @click="removeFileFromStep(file, item)"
+                      </v-col>
+                      <v-col cols="1">
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                              icon
+                              color="green lighten-1"
+                              @click="editProcedure(proc)"
+                              v-bind="attrs"
+                              v-on="on"
                             >
-                              mdi-link-off
-                            </v-icon>
-                          </v-col>
-                        </v-row>
-                      </template>
-
-                      <template v-slot:item.val1="{ item }">
-                        <v-checkbox v-model="item.val1"></v-checkbox>
-                      </template>
-                      <template v-slot:item.val2="{ item }">
-                        <v-checkbox v-model="item.val2"></v-checkbox>
-                      </template>
-                      <template v-slot:item.val3="{ item }">
-                        <v-checkbox v-model="item.val3"></v-checkbox>
-                      </template>
-                      <template v-slot:item.val4="{ item }">
-                        <v-checkbox v-model="item.val4"></v-checkbox>
-                      </template>
-                      <template v-slot:item.val5="{ item }">
-                        <v-checkbox v-model="item.val5"></v-checkbox>
-                      </template>
-                      <template v-slot:item.val6="{ item }">
-                        <v-checkbox v-model="item.val6"></v-checkbox>
-                      </template>
-                      <template v-slot:item.val7="{ item }">
-                        <v-checkbox v-model="item.val7"></v-checkbox>
-                      </template>
-                      <template v-slot:item.val8="{ item }">
-                        <v-checkbox v-model="item.val8"></v-checkbox>
-                      </template>
-                      <template v-slot:item.val9="{ item }">
-                        <v-checkbox v-model="item.val9"></v-checkbox>
-                      </template>
-                      <template v-slot:item.action="{ item }">
-                        <v-btn
-                          dark
-                          icon
-                          color="red darken-2"
-                          @click="deleteStep(item, proc)"
+                              <v-icon>mdi-square-edit-outline</v-icon>
+                            </v-btn>
+                          </template>
+                          <span>تحرير</span>
+                        </v-tooltip>
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                              dark
+                              icon
+                              color="red darken-2"
+                              @click="deleteProcedure(proc)"
+                              v-bind="attrs"
+                              v-on="on"
+                            >
+                              <v-icon> mdi-trash-can-outline</v-icon>
+                            </v-btn>
+                          </template>
+                          <span>حذف</span>
+                        </v-tooltip>
+                      </v-col>
+                      <v-col cols="12">
+                        <v-data-table
+                          dense
+                          :headers="procedureHeader"
+                          :items="proc.steps"
                         >
-                          <v-icon>mdi-trash-can-outline </v-icon>
-                        </v-btn>
-                      </template>
-                    </v-data-table>
-                  </v-col>
-                  <v-col cols="12">
-                    <span v-text="proc.remarks"></span>
-                  </v-col>
-                  <v-col cols="12">
-                    <span v-text="proc.period"></span>
-                  </v-col>
-                </v-row>
+                          <template v-slot:item.orderNo="{ item }">
+                            <v-text-field
+                              dense
+                              type="number"
+                              v-model="item.orderNo"
+                            ></v-text-field>
+                          </template>
+                          <template v-slot:item.description="{ item }">
+                            <v-textarea
+                              dense
+                              rows="1"
+                              v-model="item.description"
+                            ></v-textarea>
+                          </template>
+                          <template v-slot:item.remarks="{ item }">
+                            <v-textarea
+                              rows="1"
+                              dense
+                              v-model="item.remarks"
+                            ></v-textarea>
+                          </template>
+                          <template v-slot:item.files="{ item }">
+                            <v-row dense>
+                              <v-btn icon @click="showFilesDlg(item)">
+                                <v-icon color="primary">
+                                  mdi-link-plus
+                                </v-icon>
+                              </v-btn>
+                              <v-col
+                                cols="12"
+                                v-for="file in item.files"
+                                :key="file.name"
+                              >
+                                <span v-text="file.name"></span>
+                                <v-icon
+                                  dark
+                                  class="mdi-18px float-left"
+                                  color="red lighten-1"
+                                  @click="removeFileFromStep(file, item)"
+                                >
+                                  mdi-link-off
+                                </v-icon>
+                              </v-col>
+                            </v-row>
+                          </template>
+
+                          <template v-slot:item.val1="{ item }">
+                            <v-checkbox v-model="item.val1"></v-checkbox>
+                          </template>
+                          <template v-slot:item.val2="{ item }">
+                            <v-checkbox v-model="item.val2"></v-checkbox>
+                          </template>
+                          <template v-slot:item.val3="{ item }">
+                            <v-checkbox v-model="item.val3"></v-checkbox>
+                          </template>
+                          <template v-slot:item.val4="{ item }">
+                            <v-checkbox v-model="item.val4"></v-checkbox>
+                          </template>
+                          <template v-slot:item.val5="{ item }">
+                            <v-checkbox v-model="item.val5"></v-checkbox>
+                          </template>
+                          <template v-slot:item.val6="{ item }">
+                            <v-checkbox v-model="item.val6"></v-checkbox>
+                          </template>
+                          <template v-slot:item.val7="{ item }">
+                            <v-checkbox v-model="item.val7"></v-checkbox>
+                          </template>
+                          <template v-slot:item.val8="{ item }">
+                            <v-checkbox v-model="item.val8"></v-checkbox>
+                          </template>
+                          <template v-slot:item.val9="{ item }">
+                            <v-checkbox v-model="item.val9"></v-checkbox>
+                          </template>
+                          <template v-slot:item.action="{ item }">
+                            <v-btn
+                              dark
+                              icon
+                              color="red darken-2"
+                              @click="deleteStep(item, proc)"
+                            >
+                              <v-icon>mdi-trash-can-outline </v-icon>
+                            </v-btn>
+                          </template>
+                        </v-data-table>
+                      </v-col>
+                      <v-col cols="1" class="subtitle-2">
+                        الملاحظات :
+                      </v-col>
+                      <v-col cols="11">
+                        <span v-text="proc.remarks"></span>
+                      </v-col>
+                      <v-col cols="1" class="subtitle-2">
+                        مدة التنفيذ :
+                      </v-col>
+                      <v-col cols="11">
+                        <span v-text="proc.period"></span>
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                </v-card>
               </template>
             </fieldset>
           </v-col>

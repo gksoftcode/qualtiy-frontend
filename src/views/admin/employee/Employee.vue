@@ -207,7 +207,7 @@
                           >
                             إختيار
                           </v-btn>
-                          <v-btn text color="red" @click="depMenu = false">
+                          <v-btn text dark color="red" @click="depMenu = false">
                             إلغاء
                           </v-btn>
                         </v-card-actions>
@@ -314,7 +314,7 @@
                 mdi-content-save
               </v-icon>
             </v-btn>
-            <v-btn color="red" @click="showDialog = false">
+            <v-btn color="red" dark @click="showDialog = false">
               إلغاء
               <v-icon>
                 mdi-close

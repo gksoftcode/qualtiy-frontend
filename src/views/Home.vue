@@ -34,23 +34,23 @@
           </div>
         </v-card-text>
       </v-card>
-      <template v-show="false" v-slot:append>
-        <v-divider dense></v-divider>
-        <v-btn
-          :disabled="selectedDepartment.length === 0"
-          icon
-          @click="editWorkGuide"
-        >
-          <v-icon color="primary">mdi-square-edit-outline</v-icon>
-        </v-btn>
-        <v-btn
-          :disabled="selectedDepartment.length === 0"
-          icon
-          @click="newVersionWorkGuide"
-        >
-          <v-icon color="primary">mdi-puzzle-star</v-icon>
-        </v-btn>
-      </template>
+      <!--      <template  v-slot:append>-->
+      <!--        <v-divider dense></v-divider>-->
+      <!--        <v-btn-->
+      <!--          :disabled="selectedDepartment.length === 0"-->
+      <!--          icon-->
+      <!--          @click="editWorkGuide"-->
+      <!--        >-->
+      <!--          <v-icon color="primary">mdi-square-edit-outline</v-icon>-->
+      <!--        </v-btn>-->
+      <!--        <v-btn-->
+      <!--          :disabled="selectedDepartment.length === 0"-->
+      <!--          icon-->
+      <!--          @click="newVersionWorkGuide"-->
+      <!--        >-->
+      <!--          <v-icon color="primary">mdi-puzzle-star</v-icon>-->
+      <!--        </v-btn>-->
+      <!--      </template>-->
     </v-navigation-drawer>
     <v-app-bar clipped-right app color="primary" dark>
       <div class="d-flex align-center">

@@ -141,7 +141,7 @@
         <v-col cols="12" v-show="loading">
           <v-skeleton-loader type="article"></v-skeleton-loader>
         </v-col>
-        <v-col cols="12" v-show="loading">
+        <v-col cols="12" v-show="!loading">
           <fieldset class="wc-fieldset">
             <legend class="wc-legend">
               5 - المسؤوليات
@@ -164,129 +164,141 @@
         </v-col>
       </v-row>
       <v-row dense>
-        <v-col cols="12">
+        <v-col cols="12" v-show="loading">
+          <v-skeleton-loader
+            type="card-heading,list-item,table"
+          ></v-skeleton-loader>
+        </v-col>
+        <v-col cols="12" v-show="!loading">
           <fieldset class="wc-fieldset">
             <legend class="wc-legend">
               6 - الاجراءات
             </legend>
             <template v-for="(proc, idx) in selected.procedures">
-              <v-row dense :key="proc.id">
-                <v-col cols="12">
-                  <span
-                    class="definitionTitle"
-                    v-text="'6 . ' + (idx + 1) + ' - '"
-                  ></span>
-                  <span
-                    class="procedure-title"
-                    v-text="proc.description"
-                  ></span>
-                </v-col>
-                <v-col cols="12">
-                  <v-data-table
-                    dense
-                    :headers="procedureHeader"
-                    :items="proc.steps"
-                    :disable-pagination="true"
-                    :hide-default-footer="true"
-                  >
-                    <template v-slot:item.orderNo="{ item }">
-                      <span v-text="item.orderNo"></span>
-                    </template>
-                    <template v-slot:item.description="{ item }">
-                      <span v-text="item.description"></span>
-                    </template>
-                    <template v-slot:item.files="{ item }">
-                      <v-row dense>
-                        <v-col
-                          cols="12"
-                          v-for="file in item.files"
-                          :key="file.name"
-                        >
-                          <span v-text="file.name"></span>
-                          <a :href="attachmentPath + file.uuid">
-                            <v-icon color="primary"
-                              >mdi-cloud-download-outline
-                            </v-icon>
-                          </a>
-                        </v-col>
-                      </v-row>
-                    </template>
-                    <template v-slot:item.remarks="{ item }">
-                      <span v-text="item.remarks"></span>
-                    </template>
-                    <template v-slot:item.val1="{ item }">
-                      <v-icon color="primary" v-if="item.val1">
-                        mdi-check-box-outline
-                      </v-icon>
-                    </template>
-                    <template v-slot:item.val2="{ item }">
-                      <v-icon color="primary" v-if="item.val2">
-                        mdi-check-box-outline
-                      </v-icon>
-                    </template>
-                    <template v-slot:item.val3="{ item }">
-                      <v-icon color="primary" v-if="item.val3">
-                        mdi-check-box-outline
-                      </v-icon>
-                    </template>
-                    <template v-slot:item.val4="{ item }">
-                      <v-icon color="primary" v-if="item.val4">
-                        mdi-check-box-outline
-                      </v-icon>
-                    </template>
-                    <template v-slot:item.val5="{ item }">
-                      <v-icon color="primary" v-if="item.val5">
-                        mdi-check-box-outline
-                      </v-icon>
-                    </template>
-                    <template v-slot:item.val6="{ item }">
-                      <v-icon color="primary" v-if="item.val6">
-                        mdi-check-box-outline
-                      </v-icon>
-                    </template>
-                    <template v-slot:item.val7="{ item }">
-                      <v-icon color="primary" v-if="item.val7">
-                        mdi-check-box-outline
-                      </v-icon>
-                    </template>
-                    <template v-slot:item.val8="{ item }">
-                      <v-icon color="primary" v-if="item.val8">
-                        mdi-check-box-outline
-                      </v-icon>
-                    </template>
-                    <template v-slot:item.val9="{ item }">
-                      <v-icon color="primary" v-if="item.val9">
-                        mdi-check-box-outline
-                      </v-icon>
-                    </template>
-                    <template v-slot:footer>
-                      <tr>
-                        <td class="procedure-title">
-                          الملاحظات :
-                        </td>
-                        <td :colspan="procedureHeader.length - 1">
-                          <span v-text="proc.remarks"></span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td class="procedure-title">
-                          الوقت لإجراء اللازم :
-                        </td>
-                        <td :colspan="procedureHeader.length - 1">
-                          <span v-text="proc.period"></span>
-                        </td>
-                      </tr>
-                    </template>
-                  </v-data-table>
-                </v-col>
-                <v-divider></v-divider>
-              </v-row>
+              <v-card class="mt-2 mb-2" :key="proc.id">
+                <v-card-text>
+                  <v-row dense>
+                    <v-col cols="12">
+                      <span
+                        class="definitionTitle"
+                        v-text="'6 . ' + (idx + 1) + ' - '"
+                      ></span>
+                      <span
+                        class="procedure-title"
+                        v-text="proc.description"
+                      ></span>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-data-table
+                        dense
+                        :headers="procedureHeader"
+                        :items="proc.steps"
+                        :disable-pagination="true"
+                        :hide-default-footer="true"
+                      >
+                        <template v-slot:item.orderNo="{ item }">
+                          <span v-text="item.orderNo"></span>
+                        </template>
+                        <template v-slot:item.description="{ item }">
+                          <span v-text="item.description"></span>
+                        </template>
+                        <template v-slot:item.files="{ item }">
+                          <v-row dense>
+                            <v-col
+                              cols="12"
+                              v-for="file in item.files"
+                              :key="file.name"
+                            >
+                              <span v-text="file.name"></span>
+                              <a :href="attachmentPdfPath + file.uuid">
+                                <v-icon color="primary"
+                                  >mdi-cloud-download-outline
+                                </v-icon>
+                              </a>
+                            </v-col>
+                          </v-row>
+                        </template>
+                        <template v-slot:item.remarks="{ item }">
+                          <span v-text="item.remarks"></span>
+                        </template>
+                        <template v-slot:item.val1="{ item }">
+                          <v-icon color="primary" v-if="item.val1">
+                            mdi-check-box-outline
+                          </v-icon>
+                        </template>
+                        <template v-slot:item.val2="{ item }">
+                          <v-icon color="primary" v-if="item.val2">
+                            mdi-check-box-outline
+                          </v-icon>
+                        </template>
+                        <template v-slot:item.val3="{ item }">
+                          <v-icon color="primary" v-if="item.val3">
+                            mdi-check-box-outline
+                          </v-icon>
+                        </template>
+                        <template v-slot:item.val4="{ item }">
+                          <v-icon color="primary" v-if="item.val4">
+                            mdi-check-box-outline
+                          </v-icon>
+                        </template>
+                        <template v-slot:item.val5="{ item }">
+                          <v-icon color="primary" v-if="item.val5">
+                            mdi-check-box-outline
+                          </v-icon>
+                        </template>
+                        <template v-slot:item.val6="{ item }">
+                          <v-icon color="primary" v-if="item.val6">
+                            mdi-check-box-outline
+                          </v-icon>
+                        </template>
+                        <template v-slot:item.val7="{ item }">
+                          <v-icon color="primary" v-if="item.val7">
+                            mdi-check-box-outline
+                          </v-icon>
+                        </template>
+                        <template v-slot:item.val8="{ item }">
+                          <v-icon color="primary" v-if="item.val8">
+                            mdi-check-box-outline
+                          </v-icon>
+                        </template>
+                        <template v-slot:item.val9="{ item }">
+                          <v-icon color="primary" v-if="item.val9">
+                            mdi-check-box-outline
+                          </v-icon>
+                        </template>
+                        <template v-slot:footer>
+                          <tr>
+                            <td class="procedure-title">
+                              الملاحظات :
+                            </td>
+                            <td :colspan="procedureHeader.length - 1">
+                              <span v-text="proc.remarks"></span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="procedure-title">
+                              الوقت لإجراء اللازم :
+                            </td>
+                            <td :colspan="procedureHeader.length - 1">
+                              <span v-text="proc.period"></span>
+                            </td>
+                          </tr>
+                        </template>
+                      </v-data-table>
+                    </v-col>
+                    <v-divider></v-divider>
+                  </v-row>
+                </v-card-text>
+              </v-card>
             </template>
           </fieldset>
         </v-col>
       </v-row>
       <v-row dense>
-        <v-col cols="12">
+        <v-col cols="12" v-show="loading">
+          <v-skeleton-loader type="article"></v-skeleton-loader>
+        </v-col>
+        <v-col cols="12" v-show="!loading">
           <fieldset class="wc-fieldset">
             <legend class="wc-legend">
               7 - مؤشرات القياس
@@ -307,7 +319,12 @@
         </v-col>
       </v-row>
       <v-row dense>
-        <v-col cols="12">
+        <v-col cols="12" v-show="loading">
+          <v-skeleton-loader
+            type="card-heading,list-item,list-item,list-item"
+          ></v-skeleton-loader>
+        </v-col>
+        <v-col cols="12" v-show="!loading">
           <fieldset class="wc-fieldset">
             <legend class="wc-legend">
               8 - قائمة السجلات
@@ -431,6 +448,9 @@ export default {
     }
   },
   computed: {
+    attachmentPdfPath: function() {
+      return Paths.BASE_URL + Paths.FILE_UPLOAD_PATH + '/getPdfAttachment/'
+    },
     attachmentPath: function() {
       return Paths.BASE_URL + Paths.FILE_UPLOAD_PATH + '/getAttachment/'
     },

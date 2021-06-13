@@ -106,7 +106,6 @@ const routes = [
   },
   {
     path: '/',
-    name: 'Home',
     component: Home,
     children: [
       {
@@ -147,6 +146,7 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
   if (
     to.name === 'Home' ||
+    to.name === 'Landing' ||
     to.name === 'About' ||
     to.name === '403' ||
     to.name === '401' ||

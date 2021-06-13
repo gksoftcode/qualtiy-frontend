@@ -358,9 +358,12 @@ export default {
       this.selected.definitions.splice(idx, 1)
     },
     createNewDefinition() {
+      debugger
       this.selectedDefinition = Object.assign({}, this.emptyDefinition)
+      this.selectedDefinition.orderNo = this.selected.definitions
+        ? this.selected.definitions.length + 1
+        : 1
       this.selectedDefinition.id = this.definitionId--
-      this.selectedDefinition.orderNo = this.selected.definitions.length
       this.definitionDlg = true
     },
     saveResponsibility() {
@@ -389,18 +392,27 @@ export default {
     createNewResponsibility() {
       this.selectedResponsibility = Object.assign({}, this.emptyResponsibility)
       this.selectedResponsibility.id = this.responsibilityId--
-      this.selectedResponsibility.orderNo = this.selected.responsibilities.length
+      this.selectedResponsibility.orderNo = this.selected.responsibilities
+        ? this.selected.responsibilities.length + 1
+        : 1
       this.responsibilityDlg = true
     },
     createNewProcedure() {
       this.selectedProcedure = Object.assign({}, this.emptyProcedure)
+      this.selectedProcedure.steps = []
       this.selectedProcedure.id = this.procedureId--
-      this.selectedProcedure.orderNo =
-        _.max(
-          this.selected.procedures.map(item => {
-            return item.orderNo
-          })
-        ) + 1
+      if (this.selected.procedures.length > 0) {
+        this.selectedProcedure.orderNo =
+          Number(
+            _.max(
+              this.selected.procedures.map(item => {
+                return item.orderNo
+              })
+            )
+          ) + 1
+      } else {
+        this.selectedProcedure.orderNo = 1
+      }
       this.procedureDlg = true
     },
     saveProcedure() {

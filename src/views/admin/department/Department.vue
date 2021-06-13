@@ -19,9 +19,7 @@
             <v-icon>mdi-magnify</v-icon>
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn :disabled="disableAdd" @click="deleteDepartment" icon>
-            <v-icon>mdi-delete</v-icon>
-          </v-btn>
+
           <v-btn :disabled="disableAdd" @click="createNewDepartment" icon>
             <v-icon>mdi-plus</v-icon>
           </v-btn>
@@ -34,77 +32,84 @@
           <v-btn :disabled="disableAdd" @click="orderDlg = true" icon>
             <v-icon> mdi-order-numeric-ascending</v-icon>
           </v-btn>
-
+          <v-btn :disabled="disableAdd" @click="deleteDepartment" icon>
+            <v-icon>mdi-delete</v-icon>
+          </v-btn>
           <v-btn icon>
             <v-icon>mdi-dots-vertical</v-icon>
           </v-btn>
         </v-toolbar>
       </v-card>
-      <v-row>
-        <v-col cols="4">
-          <v-card class="department-card" :loading="loadingTree">
-            <v-card-title>
-              الهيكل
-            </v-card-title>
-            <v-card-text>
-              <v-treeview
-                dense
-                :items="root"
-                item-children="departmentList"
-                item-key="id"
-                return-object
-                :active.sync="activeDepartment"
-                activatable
-                hoverable
-              >
-                <template v-slot:prepend="{ item }">
-                  <v-icon v-if="item.departmentList.length > 0">
-                    mdi-view-grid
-                  </v-icon>
-
-                  <v-icon v-if="item.departmentList.length == 0">
-                    mdi-cube-outline
-                  </v-icon>
-                </template>
-              </v-treeview>
-            </v-card-text>
-          </v-card>
-        </v-col>
-        <v-col cols="8">
-          <v-card class="department-card">
-            <v-card-title>
-              <span v-text="currentSelected.name" />
-            </v-card-title>
-            <v-card-text>
-              <v-data-table
-                :headers="employeeHeader"
-                :items="tableResponse.data"
-                :loading="loading"
-                item-key="id"
-                :options.sync="dataTableOptions"
-                :server-items-length="tableResponse.total"
-              >
-                <template v-slot:item.sn="{ item }">
-                  {{
-                    dataTableOptions.itemsPerPage *
-                      (dataTableOptions.page - 1) +
-                      tableResponse.data.indexOf(item) +
-                      1
-                  }}
-                </template>
-                <template v-slot:item.isManager="{ item }">
-                  <v-icon
-                    color="primary"
-                    v-if="item.id === currentSelected.managerId"
+      <v-card class="mt-2" elevation="0">
+        <v-card-text>
+          <v-row>
+            <v-col cols="4">
+              <v-card class="department-card" :loading="loadingTree">
+                <v-card-title>
+                  الهيكل
+                </v-card-title>
+                <v-card-text>
+                  <v-treeview
+                    dense
+                    :items="root"
+                    item-children="departmentList"
+                    item-key="id"
+                    return-object
+                    :active.sync="activeDepartment"
+                    activatable
+                    hoverable
                   >
-                    mdi-account-tie
-                  </v-icon>
-                </template>
-              </v-data-table>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
+                    <template v-slot:prepend="{ item }">
+                      <v-icon v-if="item.departmentList.length > 0">
+                        mdi-view-grid
+                      </v-icon>
+
+                      <v-icon v-if="item.departmentList.length == 0">
+                        mdi-cube-outline
+                      </v-icon>
+                    </template>
+                  </v-treeview>
+                </v-card-text>
+              </v-card>
+            </v-col>
+            <v-col cols="8">
+              <v-card class="department-card">
+                <v-card-title>
+                  <span v-text="currentSelected.name" />
+                </v-card-title>
+                <v-card-text>
+                  <v-data-table
+                    :headers="employeeHeader"
+                    :items="tableResponse.data"
+                    :loading="loading"
+                    item-key="id"
+                    :options.sync="dataTableOptions"
+                    :server-items-length="tableResponse.total"
+                  >
+                    <template v-slot:item.sn="{ item }">
+                      {{
+                        dataTableOptions.itemsPerPage *
+                          (dataTableOptions.page - 1) +
+                          tableResponse.data.indexOf(item) +
+                          1
+                      }}
+                    </template>
+                    <template v-slot:item.isManager="{ item }">
+                      <v-icon
+                        color="primary"
+                        v-if="item.id === currentSelected.managerId"
+                      >
+                        mdi-account-tie
+                      </v-icon>
+                    </template>
+                  </v-data-table>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+
       <v-dialog persistent width="60%" v-model="editDialog">
         <v-card dense>
           <v-card-title>
@@ -357,16 +362,25 @@ export default {
       this.selectedEmployee = { id: -1, fullName: '' }
     },
     setManager() {
-      if (this.selectedEmployee.id !== -1) {
-        DepartmentService.setManager(
-          this.currentSelected,
-          this.selectedEmployee
-        )
-          .then(response => {
-            this.currentSelected.managerId = this.selectedEmployee.id
-          })
-          .catch(error => {})
-      }
+      this.$confirm('هل تريد أن تعدل المدير').then(res => {
+        if (res) {
+          if (this.selectedEmployee.id !== -1) {
+            DepartmentService.setManager(
+              this.currentSelected,
+              this.selectedEmployee
+            )
+              .then(response => {
+                this.currentSelected.managerId = this.selectedEmployee.id
+                this.employeeSelector = false
+                this.$toast.success('تم تعديل المدير')
+              })
+              .catch(error => {
+                this.employeeSelector = false
+                this.$toast.error('خطأ في عملية الحفظ')
+              })
+          }
+        }
+      })
     },
     save() {
       this.saving = true
@@ -375,6 +389,7 @@ export default {
         if (this.editDepartment.encId === -1) {
           this.editDepartment.level = this.currentSelected.level + 1
           this.editDepartment.parentId = this.currentSelected.id
+          this.editDepartment.manager = null
         }
         DepartmentService.save(this.editDepartment)
           .then(response => {
@@ -390,7 +405,7 @@ export default {
       }
     },
     deleteDepartment() {
-      DepartmentService.deleteDepartment(this.activeDepartment[0]).then(
+      DepartmentService.deleteDepartment(this.currentSelected).then(
         response => {
           this.loadTree()
         }

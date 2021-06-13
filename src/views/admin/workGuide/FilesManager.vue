@@ -170,7 +170,7 @@
             }}
           </template>
           <template v-slot:item.name="{ item }">
-            {{ item.name }} {{ item.status }}
+            {{ item.name }}
             <v-btn
               v-if="item.status >= 20"
               icon
@@ -243,31 +243,6 @@
               </template>
               <span>
                 تحرير ومتابعة
-              </span>
-            </v-tooltip>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  v-show="false"
-                  color="primary"
-                  icon
-                  v-bind="attrs"
-                  v-on="on"
-                  :to="{
-                    name: 'WorkGuideAdminView',
-                    params: {
-                      encId: item.encId,
-                      viewType: '1'
-                    }
-                  }"
-                >
-                  <v-icon>
-                    mdi-file-eye
-                  </v-icon>
-                </v-btn>
-              </template>
-              <span>
-                عرض ومتابعة
               </span>
             </v-tooltip>
             <v-tooltip bottom>
@@ -468,7 +443,7 @@
           <v-row dense v-show="selectedFile.status < 10">
             <v-col cols="4">
               <v-file-input
-                v-show="selectedFile.status < 10"
+                v-show="selectedFile.status < 10 && hasQuality"
                 dense
                 outlined
                 v-model="tempFileData"
@@ -479,7 +454,7 @@
             </v-col>
             <v-col cols="2">
               <v-btn
-                v-show="selectedFile.tempFileSize > 0"
+                v-show="selectedFile.tempFileSize > 0 && hasQuality"
                 color="primary"
                 :href="attachmentTempPath + selectedFile.uuid"
                 >ملف مؤقت
@@ -488,7 +463,7 @@
             </v-col>
             <v-col cols="4">
               <v-file-input
-                v-show="selectedFile.status < 10"
+                v-show="selectedFile.status < 10 && hasQuality"
                 dense
                 outlined
                 v-model="pdfFileData"
@@ -499,7 +474,7 @@
             </v-col>
             <v-col cols="2">
               <v-btn
-                v-show="selectedFile.pdfFileSize > 0"
+                v-show="selectedFile.pdfFileSize > 0 && hasQuality"
                 color="primary"
                 :href="attachmentPdfPath + selectedFile.uuid"
                 >PDF
@@ -509,7 +484,10 @@
           </v-row>
           <v-row dense v-show="selectedFile.status >= 10">
             <v-col cols="1"></v-col>
-            <v-col cols="2" v-show="selectedFile.tempFileSize > 0">
+            <v-col
+              cols="2"
+              v-show="selectedFile.tempFileSize > 0 && hasQuality"
+            >
               ملف مؤقت
               <v-btn
                 icon
@@ -519,7 +497,13 @@
                 <v-icon color="accent">mdi-cloud-download-outline</v-icon>
               </v-btn>
             </v-col>
-            <v-col cols="2" v-show="selectedFile.pdfFileSize > 0">
+            <v-col
+              cols="2"
+              v-show="
+                selectedFile.pdfFileSize > 0 &&
+                  (hasQuality || selectedFile.status === 20)
+              "
+            >
               PDF
               <v-btn
                 icon

@@ -4,7 +4,7 @@
       <v-card-title>
         <v-toolbar-items>
           <v-icon>
-            mdi-briefcase-account mdi-24px
+            mdi-book-check mdi-24px
           </v-icon>
           <v-toolbar-title>إدارة خطة التدقيق</v-toolbar-title>
         </v-toolbar-items>
@@ -22,7 +22,7 @@
             <v-icon @click="loadData">mdi-magnify</v-icon>
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn icon @click="creatNew()">
+          <v-btn icon v-if="canEdit" @click="creatNew()">
             <v-icon>
               mdi-plus
             </v-icon>
@@ -62,16 +62,20 @@
                 1
             }}
           </template>
-          <template v-slot:item.active="{ item }">
-            <v-icon color="green darken-2" v-if="item.active">
-              mdi-bookmark-check
-            </v-icon>
-            <v-icon color="red darken-2" v-else>
-              mdi-bookmark-remove
-            </v-icon>
+          <template v-slot:item.status="{ item }">
+            <span
+              class="ms-2 text-subtitle-2 accent--text"
+              v-text="status[item.status]"
+            >
+            </span>
           </template>
           <template v-slot:item.action="{ item }">
-            <v-btn color="primary" icon @click="edit(item)">
+            <v-btn
+              color="primary"
+              icon
+              @click="edit(item)"
+              v-if="canEdit && item.status < 10"
+            >
               <v-icon>
                 mdi-square-edit-outline
               </v-icon>
@@ -258,13 +262,23 @@ import EmployeeService from '@/service/employee/EmployeeService'
 export default {
   created() {
     this.dataTableRequest.data.textSearch = ''
+    this.status[0] = 'جديد'
+    this.status[1] = 'إرجاع'
+    this.status[10] = 'معتمد'
+    this.status[11] = 'ارجاع نتائج'
+    this.status[20] = 'معتمد نهائي'
   },
+
   computed: {
-    hasAccess: function() {
+    canEdit: function() {
       let ha = false
       try {
         this.employee.roles.forEach(item => {
-          if (item === 'ROLE_HR' || item === 'ROLE_ADMIN') {
+          if (
+            item === 'ROLE_QUALITY' ||
+            item === 'ROLE_MANAGER' ||
+            item === 'ROLE_ADMIN'
+          ) {
             ha = true
           }
         })
@@ -272,6 +286,20 @@ export default {
         return false
       }
       return ha
+    },
+    hasAccess: function() {
+      return true
+      // let ha = false
+      // try {
+      //   this.employee.roles.forEach(item => {
+      //     if (item === 'ROLE_HR' || item === 'ROLE_ADMIN') {
+      //       ha = true
+      //     }
+      //   })
+      // } catch (e) {
+      //   return false
+      // }
+      // return ha
     },
     ...mapState('auth', ['employee'])
   },
@@ -391,6 +419,7 @@ export default {
   },
   data() {
     return {
+      status: new Map(),
       empDataSearch: [],
       emps: [],
       selectedEmployee: {},
@@ -407,6 +436,7 @@ export default {
         id: -1,
         department: { id: -1, name: '' },
         departmentId: -1,
+        status: 0,
         fromDate: '',
         toDate: '',
         auditors: [],
@@ -474,7 +504,7 @@ export default {
         },
         {
           text: 'الحالة',
-          value: 'active',
+          value: 'status',
           align: 'center',
           sortable: true,
           filterable: true,

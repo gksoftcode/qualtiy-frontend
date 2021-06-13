@@ -243,7 +243,7 @@ export default {
         to: '/admin/filesManager'
       },
       {
-        icon: 'mdi-file-document-multiple mdi-flip-h',
+        icon: 'mdi-book-check',
         text: 'خطة التدقيق',
         to: '/admin/auditPlan'
       },
@@ -283,4 +283,10 @@ export default {
   }
 }
 </script>
-<style scoped></style>
+<style lang="scss">
+.wise-c-Title {
+  font-weight: bold;
+  font-size: 1.1em;
+  color: var(--v-primary-base);
+}
+</style>

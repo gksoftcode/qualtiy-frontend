@@ -6,6 +6,7 @@
         <v-toolbar-title>إدارة الأحقيات</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-autocomplete
+          class="ml-2"
           :items="employees"
           item-text="fullName"
           item-value="encId"

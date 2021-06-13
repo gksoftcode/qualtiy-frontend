@@ -31,6 +31,15 @@ export default {
       }
     )
   },
+  searchByDepartment: async requestData => {
+    return await axios.post(
+      Paths.BASE_URL + Paths.EMPLOYEE_PATH + '/searchByDepartment',
+      requestData,
+      {
+        headers: authHeader()
+      }
+    )
+  },
   listAll: async () => {
     return await axios.post(
       Paths.BASE_URL + Paths.EMPLOYEE_PATH + '/listAll',
