@@ -392,13 +392,11 @@ export default {
     updated(suc) {
       this.$emit('updated', [{ object: this.selected, success: suc }])
       this.setLoading(false)
-      console.log(this.$store.state.wg.loading)
     },
     loadWorkGuide() {
       if (this.viewType === '0' && this.departmentId !== '0') {
         this.loading = true
         this.setLoading(true)
-        console.log(this.$store.state.wg.loading)
         WorkGuideService.getByDepartment(this.departmentId, 10)
           .then(response => {
             this.selected = response.data

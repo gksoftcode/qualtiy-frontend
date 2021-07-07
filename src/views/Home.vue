@@ -21,12 +21,12 @@
               activatable
               hoverable
             >
-              <template v-slot:prepend="{ item }">
+              <template v-slot:prepend="{ item }" v-if="false">
                 <v-icon v-if="item.departmentList.length > 0">
                   mdi-view-grid
                 </v-icon>
 
-                <v-icon v-if="item.departmentList.length == 0">
+                <v-icon v-if="item.departmentList.length === 0">
                   mdi-cube-outline
                 </v-icon>
               </template>
@@ -58,7 +58,7 @@
           alt="Vuetify Logo"
           class="shrink mr-2"
           contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
+          :src="require('../assets/swlogo.png')"
           transition="scale-transition"
           width="40"
         />

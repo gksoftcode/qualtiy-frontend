@@ -69,6 +69,18 @@ export default {
       }
     )
   },
+  listTransactionByAttachment: async encId => {
+    return await axios.post(
+      Paths.BASE_URL +
+        Paths.ATTACHMENT_PATH +
+        '/listTransactionByAttachment/' +
+        encId,
+      {},
+      {
+        headers: authHeader()
+      }
+    )
+  },
   loadList: async departmentId => {
     return await axios.post(
       Paths.BASE_URL + Paths.ATTACHMENT_PATH + '/list/' + departmentId,
@@ -81,6 +93,32 @@ export default {
   listApproved: async departmentId => {
     return await axios.post(
       Paths.BASE_URL + Paths.ATTACHMENT_PATH + '/listApproved/' + departmentId,
+      {},
+      {
+        headers: authHeader()
+      }
+    )
+  },
+  listApprovedByDepartment: async departmentId => {
+    return await axios.post(
+      Paths.BASE_URL +
+        Paths.ATTACHMENT_PATH +
+        '/listApprovedByDepartment/' +
+        departmentId,
+      {},
+      {
+        headers: authHeader()
+      }
+    )
+  },
+  replaceAttachment: async (sEncId, dEncId) => {
+    return await axios.post(
+      Paths.BASE_URL +
+        Paths.ATTACHMENT_PATH +
+        '/replaceAttachment/' +
+        sEncId +
+        '/' +
+        dEncId,
       {},
       {
         headers: authHeader()

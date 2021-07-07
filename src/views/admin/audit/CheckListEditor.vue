@@ -190,7 +190,19 @@
                   >
                   </v-select>
                 </v-col>
-                <v-col cols="8">
+                <v-col cols="3">
+                  <v-select
+                    outlined
+                    dense
+                    label="الموظف"
+                    :items="employeeList"
+                    item-text="fullName"
+                    item-value="id"
+                    v-model="item.employeeId"
+                  >
+                  </v-select>
+                </v-col>
+                <v-col cols="7">
                   <v-textarea
                     rows="1"
                     v-model="item.remarks"
@@ -208,6 +220,20 @@
                     :loading="itemSaving"
                   >
                     حفظ
+                    <v-icon>
+                      mdi-content-save
+                    </v-icon>
+                  </v-btn>
+                </v-col>
+                <v-col cols="2" v-show="item.auditResult > 1">
+                  <v-btn
+                    text
+                    color="orange darken-1"
+                    @click="updateResultItem(item)"
+                    :disabled="itemSaving"
+                    :loading="itemSaving"
+                  >
+                    اجراء تصحيح
                     <v-icon>
                       mdi-content-save
                     </v-icon>
@@ -318,6 +344,7 @@
 import AuditPlanService from '@/service/audit/AuditPlanService'
 import _ from 'lodash'
 import { mapState } from 'vuex'
+import EmployeeService from '@/service/employee/EmployeeService'
 export default {
   props: {
     auditPlanEncId: {
@@ -344,7 +371,7 @@ export default {
         this.selectedAuditPlan = response.data
         this.emptyItem.auditPlan = this.selectedAuditPlan
         this.emptyItem.auditPlanId = this.selectedAuditPlan.id
-        this.createItem()
+        this.loadEmployeeList()
         this.loadingAuditPlan = false
       })
       .catch(error => {
@@ -352,6 +379,13 @@ export default {
       })
   },
   methods: {
+    loadEmployeeList() {
+      EmployeeService.listByDepartment(this.selectedAuditPlan.department.encId)
+        .then(res => {
+          this.employeeList = res.data
+        })
+        .catch(error => {})
+    },
     save() {
       this.saving = true
       AuditPlanService.saveItem(this.selectedItem)
@@ -464,10 +498,11 @@ export default {
   },
   data() {
     return {
+      employeeList: [],
       auditResult: [
         { id: 0, name: 'غير محدد' },
-        { id: 1, name: 'صحيح' },
-        { id: 2, name: 'غير صحيح' },
+        { id: 1, name: 'مطابق' },
+        { id: 2, name: 'غير مطابق' },
         { id: 3, name: 'غير موجود' }
       ],
       trnsactionDlg: false,

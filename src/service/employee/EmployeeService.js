@@ -67,6 +67,18 @@ export default {
       }
     )
   },
+  listByDepartment: async departmentEncId => {
+    return await axios.post(
+      Paths.BASE_URL +
+        Paths.EMPLOYEE_PATH +
+        '/listByDepartment/' +
+        departmentEncId,
+      {},
+      {
+        headers: authHeader()
+      }
+    )
+  },
   save: async employee => {
     if (employee.encId === -1) {
       return await axios.post(

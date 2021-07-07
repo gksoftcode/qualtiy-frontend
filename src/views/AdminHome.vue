@@ -289,4 +289,17 @@ export default {
   font-size: 1.1em;
   color: var(--v-primary-base);
 }
+
+.primary-text {
+  color: var(--v-primary-base);
+}
+.accent-text {
+  color: var(--v-accent-base);
+}
+
+.error-text {
+  color: darkred;
+  font-style: italic;
+  font-weight: bold;
+}
 </style>
