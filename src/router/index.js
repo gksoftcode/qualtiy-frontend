@@ -147,6 +147,7 @@ router.beforeEach((to, from, next) => {
   if (
     to.name === 'Home' ||
     to.name === 'Landing' ||
+    to.name === 'View' ||
     to.name === 'About' ||
     to.name === '403' ||
     to.name === '401' ||

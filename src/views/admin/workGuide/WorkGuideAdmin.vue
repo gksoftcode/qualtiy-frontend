@@ -220,7 +220,9 @@
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
                   v-if="
-                    item.status === 0 && (item.type === 1 || item.type === 5)
+                    (item.status === 0 &&
+                      (item.type === 1 || item.type === 5)) ||
+                      hasFullDepartment
                   "
                   color="green darken-1"
                   icon
@@ -266,6 +268,24 @@
                 عرض ومتابعة
               </span>
             </v-tooltip>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  color="accent"
+                  icon
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="showTransactionDialog(item.encId)"
+                >
+                  <v-icon>
+                    mdi-format-list-bulleted
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>
+                عرض الأحداث
+              </span>
+            </v-tooltip>
           </template>
         </v-data-table>
       </v-card-text>
@@ -281,6 +301,10 @@
       </v-card-text>
       <v-card-actions> </v-card-actions>
     </v-card>
+    <WorkGuideTransactionDialog
+      v-model="transactionDialog"
+      :work-guide-id="selectWorkGuideId"
+    ></WorkGuideTransactionDialog>
   </div>
 </template>
 
@@ -291,7 +315,9 @@ import DataTableResponse from '@/model/response/DataTableResponse'
 import { mapState } from 'vuex'
 import DepartmentService from '@/service/department/DepartmentService'
 import WorkGuideService from '@/service/workGuide/WorkGuideService'
+import WorkGuideTransactionDialog from '@/components/transaction/WorkGuideTransactionDialog'
 export default {
+  components: { WorkGuideTransactionDialog },
   created() {
     this.dataTableRequest.data.textSearch = ''
   },
@@ -302,6 +328,7 @@ export default {
         this.employee.roles.forEach(item => {
           if (
             item === 'ROLE_QUALITY' ||
+            item === 'ROLE_QUALITY_USER' ||
             item === 'ROLE_ADMIN' ||
             item === 'ROLE_MANAGER'
           ) {
@@ -337,6 +364,13 @@ export default {
     this.loadDepartmentTree()
   },
   methods: {
+    showTransactionDialog(encId) {
+      console.log(this.transactionDialog)
+      if (encId && encId !== '-1') {
+        this.selectWorkGuideId = encId
+        this.transactionDialog = true
+      }
+    },
     clearDepartment() {
       this.department = { id: -1, name: '', encId: '-1' }
     },
@@ -475,6 +509,8 @@ export default {
   },
   data() {
     return {
+      transactionDialog: false,
+      selectWorkGuideId: '',
       loadTree: false,
       selectedType: -1,
       selectedStatus: -1,
@@ -486,7 +522,7 @@ export default {
         { id: 1, name: 'جديد' },
         { id: 5, name: 'نسخة جديدة' },
         { id: 10, name: 'نسخة البيئة الحية' },
-        { id: 50, name: 'نسخة قديمة' }
+        { id: 20, name: 'نسخة قديمة' }
       ],
       statuses: [
         { id: -1, name: 'الجميع' },

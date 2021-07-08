@@ -43,6 +43,16 @@ export default {
       { headers: authHeader() }
     )
   },
+  listTransactionByWorkGuide: async encId => {
+    return await axios.post(
+      Paths.BASE_URL +
+        Paths.WORK_GUIDE_PATH +
+        '/listTransactionByWorkGuide/' +
+        encId,
+      {},
+      { headers: authHeader() }
+    )
+  },
   getByDepartmentEdit: async (departmentIdEnc, type) => {
     return await axios.post(
       Paths.BASE_URL +

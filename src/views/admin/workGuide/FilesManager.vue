@@ -230,7 +230,7 @@
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
                   v-if="hasQuality"
-                  color="orange"
+                  color="green"
                   icon
                   v-bind="attrs"
                   v-on="on"
@@ -248,7 +248,26 @@
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
-                  v-show="item.status === 0"
+                  v-if="item.status === 20"
+                  color="orange darken-1"
+                  icon
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="showTransDialog(item)"
+                >
+                  <v-icon>
+                    mdi-file-swap
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>
+                استبدال
+              </span>
+            </v-tooltip>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  v-show="item.status <= 10"
                   color="red darken-1"
                   icon
                   v-bind="attrs"
@@ -262,6 +281,24 @@
               </template>
               <span>
                 حذف
+              </span>
+            </v-tooltip>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  color="accent"
+                  icon
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="showTransactionDialog(item.encId)"
+                >
+                  <v-icon>
+                    mdi-format-list-bulleted
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>
+                عرض الأحداث
               </span>
             </v-tooltip>
           </template>
@@ -572,6 +609,15 @@
           <v-btn
             dark
             v-show="selectedFile.status === 20"
+            color="orange darken-1"
+            @click="updateStatus(30)"
+          >
+            تحويل إلى نسخة قديمة
+            <v-icon>mdi-backup-restore</v-icon>
+          </v-btn>
+          <v-btn
+            dark
+            v-show="selectedFile.status === 20"
             color="red darken-1"
             @click="updateStatus(50)"
           >
@@ -591,6 +637,83 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="transDlg" width="50%">
+      <v-card>
+        <v-card-title>
+          استبدال سجل
+        </v-card-title>
+        <v-card-text>
+          <v-row dense>
+            <v-col cols="6">
+              <v-text-field
+                dense
+                outlined
+                readonly
+                :value="selectedFile.name"
+                label="السجل الحالي"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                dense
+                outlined
+                readonly
+                :value="selectedFile.version"
+                label="النسخة"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="4">
+              <v-text-field
+                dense
+                outlined
+                readonly
+                :value="selectedFile.issueDate"
+                label="تاريخ الاصدار"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <v-row dense>
+            <v-col cols="12">
+              <v-data-table
+                :loading="loadingOld"
+                :headers="oldHeader"
+                :items="approvedList"
+                show-select
+                single-select
+                dense
+                disable-pagination
+                v-model="selectedOld"
+              ></v-data-table>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+            dark
+            color="green darken-1"
+            :disabled="selectedOld.length === 0"
+            @click="replaceOld"
+          >
+            استبدال
+            <v-icon>mdi-file-swap</v-icon>
+          </v-btn>
+          <v-spacer></v-spacer>
+          <v-btn
+            dark
+            class="float-right"
+            color="red darken-1"
+            @click="transDlg = false"
+          >
+            إغلاق
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <attachment-transaction-dialog
+      :parent-id="selectAttachmentId"
+      v-model="transactionDialog"
+    ></attachment-transaction-dialog>
   </div>
 </template>
 
@@ -602,7 +725,9 @@ import { mapState } from 'vuex'
 import DepartmentService from '@/service/department/DepartmentService'
 import AttachmentService from '@/service/attachment/AttachmentService'
 import { Paths } from '@/Paths'
+import AttachmentTransactionDialog from '@/components/transaction/AttachmentTransactionDialog'
 export default {
+  components: { AttachmentTransactionDialog },
   created() {
     this.dataTableRequest.data.textSearch = ''
   },
@@ -683,7 +808,57 @@ export default {
     this.loadDepartmentTree()
   },
   methods: {
+    replaceOld() {
+      if (this.selectedOld[0]) {
+        this.$confirm(
+          'هل تود استبدال النسخة  <span class="primary-text">' +
+            this.selectedOld[0].version +
+            ' </span> بالنسخة <span class="primary-text">' +
+            this.selectedFile.version +
+            ' </span>'
+        ).then(res => {
+          if (res) {
+            AttachmentService.replaceAttachment(
+              this.selectedFile.encId,
+              this.selectedOld[0].encId
+            )
+              .then(res => {
+                this.$toast.success('تم التعديل بنجاح')
+              })
+              .catch(error => {
+                console.log(error.response)
+                this.$toast.error(
+                  'خطأ في عملية الاستبدال رقم الخطأ ' + error.response.data.id
+                )
+              })
+          }
+        })
+      }
+    },
+    showTransDialog(file) {
+      this.loadingOld = true
+      this.selectedFile = Object.assign({}, file)
+      this.transDlg = true
+      AttachmentService.listApprovedByDepartment(this.selectedFile.departmentId)
+        .then(res => {
+          this.approvedList = res.data
+          this.approvedList = this.approvedList.filter(item => {
+            return item.id !== this.selectedFile.id
+          })
+          this.loadingOld = false
+        })
+        .catch(error => {
+          this.loadingOld = false
+        })
+    },
+    showTransactionDialog(encId) {
+      if (encId && encId !== '-1') {
+        this.selectAttachmentId = encId
+        this.transactionDialog = true
+      }
+    },
     editFile(file) {
+      this.listApproved = []
       this.usedCount = 0
       this.selectedFile = Object.assign({}, file)
       this.pdfFileData = null
@@ -855,6 +1030,12 @@ export default {
   },
   data() {
     return {
+      loadingOld: false,
+      transDlg: false,
+      selectedOld: [],
+      approvedList: [],
+      transactionDialog: false,
+      selectAttachmentId: '',
       usedCount: 0,
       editDlg: false,
       fileIssueDateMenu: false,
@@ -883,6 +1064,7 @@ export default {
         { id: -1, name: 'الجميع' },
         { id: 0, name: 'جديد' },
         { id: 5, name: 'قيد التحرير' },
+        { id: 6, name: 'إرجاع' },
         { id: 10, name: 'مرسلة' },
         { id: 20, name: 'معتمدة' },
         { id: 30, name: 'نسخة قديمة' },
@@ -960,10 +1142,41 @@ export default {
           width: '15%'
         }
       ],
+      oldHeader: [
+        {
+          text: 'اسم الوثيقة',
+          value: 'name',
+          align: 'center',
+          sortable: true,
+          filterable: true,
+          width: '60%'
+        },
+        {
+          text: 'النسخة',
+          value: 'version',
+          align: 'center',
+          sortable: true,
+          filterable: true,
+          width: '10%'
+        },
+        {
+          text: 'تاريخ الاصدار',
+          value: 'issueDate',
+          align: 'center',
+          sortable: true,
+          filterable: true,
+          width: '30%'
+        }
+      ],
       messages: ['', 'تم الحذف بنجاح', 'لم يتم الحذف هذه الوثيقة مرتبطة باجراء']
     }
   }
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.select-issueDate {
+  float: left;
+  color: var(--v-primary-base);
+}
+</style>
