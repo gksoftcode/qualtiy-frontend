@@ -56,6 +56,14 @@
             outlined
           ></v-text-field>
         </v-col>
+         <v-col cols="1">
+        <v-btn  color="info" @click="generatePdf">
+          <v-icon>
+            mdi-file-pdf
+          </v-icon>
+          pdf
+        </v-btn>
+         </v-col>
       </v-row>
       <v-row dense>
         <v-col cols="12" v-show="loading">
@@ -350,6 +358,8 @@
 
 <script>
 import WorkGuideService from '@/service/workGuide/WorkGuideService'
+import ReportService from '@/service/report/ReportService'
+
 import { Paths } from '@/Paths'
 import FileList from '@/components/FileList'
 import AttachmentService from '@/service/attachment/AttachmentService'
@@ -434,6 +444,18 @@ export default {
       AttachmentService.listApproved(this.departmentId)
         .then(response => {
           this.files = response.data
+        })
+        .catch(error => {})
+    },
+    async generatePdf() {
+      ReportService.generateWorkGuideReport(this.selected.id)
+        .then(response => {
+          const linkSource = 'data:application/pdf;base64,' + response.data.file
+          const downloadLink = document.createElement('a')
+          const fileName = 'workguide.pdf'
+          downloadLink.href = linkSource
+          downloadLink.download = fileName
+          downloadLink.click()
         })
         .catch(error => {})
     },

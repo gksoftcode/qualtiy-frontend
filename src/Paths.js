@@ -13,5 +13,6 @@ export const Paths = {
   ATTACHMENT_PATH: 'api/attachment',
   FILE_UPLOAD_PATH: 'api/common/fileUploader',
   AUDIT_PLAN_PATH: 'api/audit_plan',
-  PERMISSION_PATH: 'api/permission'
+  PERMISSION_PATH: 'api/permission',
+  REPORT_PATH: 'api/report'
 }
