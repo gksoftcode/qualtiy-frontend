@@ -192,6 +192,7 @@
                 </v-col>
                 <v-col cols="3">
                   <v-select
+                    clearable
                     outlined
                     dense
                     label="الموظف"
@@ -228,8 +229,8 @@
                 <v-col cols="2" v-show="item.auditResult > 1">
                   <v-btn
                     text
-                    color="orange darken-1"
-                    @click="updateResultItem(item)"
+                    color="accent"
+                    @click="editCorrection(item)"
                     :disabled="itemSaving"
                     :loading="itemSaving"
                   >
@@ -311,7 +312,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="trnsactionDlg" width="70%">
+    <v-dialog v-model="transactionDlg" width="70%">
       <v-card>
         <v-card-title>
           الاجراءات
@@ -337,6 +338,375 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="correctionDlg" width="80%">
+      <v-card :loading="loadingCorrection">
+        <v-card-title>
+          تقرير تصحيح
+        </v-card-title>
+        <v-card-text>
+          <v-card>
+            <v-card-text>
+              <v-row dense>
+                <v-col cols="12">
+                  <v-textarea
+                    rows="2"
+                    outlined
+                    dense
+                    label="وصف حالة عدم المطابقة"
+                    v-model="selectedCorrection.description"
+                  ></v-textarea>
+                </v-col>
+                <v-col cols="4">
+                  <v-menu
+                    ref="descDateMenu"
+                    v-model="descDateMenu"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        outlined
+                        v-model="selectedCorrection.descDate"
+                        label="تاريخ"
+                        prepend-inner-icon="mdi-calendar"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                        dense
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="selectedCorrection.descDate"
+                      scrollable
+                      @input="descDateMenu = false"
+                    >
+                    </v-date-picker>
+                  </v-menu>
+                </v-col>
+                <v-col cols="4">
+                  <v-autocomplete
+                    outlined
+                    :items="employees"
+                    item-text="fullName"
+                    item-value="id"
+                    v-model="selectedCorrection.descEmpId"
+                    dense
+                    clearable
+                    :loading="loadingEmployee"
+                    label="الموظف"
+                  ></v-autocomplete>
+                </v-col>
+              </v-row>
+              <v-row dense>
+                <v-col cols="12">
+                  <v-textarea
+                    rows="2"
+                    outlined
+                    dense
+                    label="تصحيح فوري إذا لزم الأمر"
+                    v-model="selectedCorrection.immediateCorrection"
+                  ></v-textarea>
+                </v-col>
+                <v-col cols="4">
+                  <v-menu
+                    ref="immediateDateMenu"
+                    v-model="immediateDateMenu"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        outlined
+                        v-model="selectedCorrection.immediateDate"
+                        label="تاريخ"
+                        prepend-inner-icon="mdi-calendar"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                        dense
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="selectedCorrection.immediateDate"
+                      scrollable
+                      @input="immediateDateMenu = false"
+                    >
+                    </v-date-picker>
+                  </v-menu>
+                </v-col>
+                <v-col cols="4">
+                  <v-select
+                    clearable
+                    outlined
+                    dense
+                    label="الموظف"
+                    :items="employeeList"
+                    item-text="fullName"
+                    item-value="id"
+                    v-model="selectedCorrection.immediateEmpId"
+                  >
+                  </v-select>
+                </v-col>
+              </v-row>
+              <v-row dense>
+                <v-col cols="12">
+                  <v-textarea
+                    rows="2"
+                    outlined
+                    dense
+                    label="الاسباب الجذرية"
+                    v-model="selectedCorrection.rootReason"
+                  ></v-textarea>
+                </v-col>
+                <v-col cols="4">
+                  <v-menu
+                    ref="rootReasonDateMenu"
+                    v-model="rootReasonDateMenu"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        outlined
+                        v-model="selectedCorrection.rootReasonDate"
+                        label="تاريخ"
+                        prepend-inner-icon="mdi-calendar"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                        dense
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="selectedCorrection.rootReasonDate"
+                      scrollable
+                      @input="rootReasonDateMenu = false"
+                    >
+                    </v-date-picker>
+                  </v-menu>
+                </v-col>
+                <v-col cols="4">
+                  <v-select
+                    clearable
+                    outlined
+                    dense
+                    label="الموظف"
+                    :items="employeeList"
+                    item-text="fullName"
+                    item-value="id"
+                    v-model="selectedCorrection.rootReasonEmpId"
+                  >
+                  </v-select
+                ></v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+          <v-card>
+            <v-card-text>
+              <v-row dense>
+                <v-col cols="8">
+                  <v-text-field
+                    rows="2"
+                    outlined
+                    dense
+                    label="الاجراء التصحيحي"
+                    v-model="selectedCorrectionStep.description"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-menu
+                    ref="toDoDateMenu"
+                    v-model="toDoDateMenu"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        outlined
+                        v-model="selectedCorrectionStep.toDoDate"
+                        label="تاريخ"
+                        prepend-inner-icon="mdi-calendar"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                        dense
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="selectedCorrectionStep.toDoDate"
+                      scrollable
+                      @input="toDoDateMenu = false"
+                    >
+                    </v-date-picker>
+                  </v-menu>
+                </v-col>
+                <v-col cols="1">
+                  <v-btn icon color="accent" @click="addCorrectionStep">
+                    <v-icon>mdi-plus</v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+              <v-row dense>
+                <v-col cols="12">
+                  <v-data-table
+                    :headers="stepsHeader"
+                    :items="selectedCorrection.correctionSteps"
+                    disable-pagination
+                  >
+                    <template v-slot:item.sn="{ item }">
+                      {{ selectedCorrection.correctionSteps.indexOf(item) + 1 }}
+                    </template>
+                    <template v-slot:item.action="{ item }">
+                      <v-tooltip bottom>
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-btn
+                            color="red darken-1"
+                            icon
+                            v-bind="attrs"
+                            v-on="on"
+                            @click="deleteCorrectionStep(item)"
+                          >
+                            <v-icon>
+                              mdi-trash-can
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        <span>
+                          حذف
+                        </span>
+                      </v-tooltip>
+                    </template>
+                  </v-data-table>
+                </v-col>
+                <v-col cols="4">
+                  <v-menu
+                    ref="executeDateMenu"
+                    v-model="executeDateMenu"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        outlined
+                        v-model="selectedCorrection.executeDate"
+                        label="تاريخ"
+                        prepend-inner-icon="mdi-calendar"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                        dense
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="selectedCorrection.executeDate"
+                      scrollable
+                      @input="executeDateMenu = false"
+                    >
+                    </v-date-picker>
+                  </v-menu>
+                </v-col>
+                <v-col cols="4">
+                  <v-autocomplete
+                    outlined
+                    :items="employees"
+                    item-text="fullName"
+                    item-value="id"
+                    v-model="selectedCorrection.executeEmpId"
+                    dense
+                    clearable
+                    :loading="loadingEmployee"
+                    label="الموظف"
+                  ></v-autocomplete>
+                </v-col>
+              </v-row>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn
+                text
+                color="primary"
+                @click="saveCorrection(itemToEdit)"
+                :loading="savingCorrection"
+                :disabled="savingCorrection"
+                v-if="selectedCorrection.status === 0"
+              >
+                حفظ
+                <v-icon> mdi-content-save</v-icon>
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+          <v-card class="mt-2">
+            <v-card-text>
+              <v-row dense>
+                <v-col cols="12">
+                  <v-radio-group dense v-model="selectedCorrection.status" row>
+                    <v-radio label="تم التنفيذ بفعالية" :value="1"></v-radio>
+                    <v-radio label="لم يتم التنفيذ" :value="2"></v-radio>
+                  </v-radio-group>
+                </v-col>
+                <v-col cols="12">
+                  <v-textarea
+                    v-model="selectedCorrection.followDescription"
+                    label="ملاحظات المتابعة"
+                    outlined
+                    rows="2"
+                  ></v-textarea>
+                </v-col>
+              </v-row>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn
+                text
+                color="accent"
+                @click="updateCorrectionFollow"
+                :loading="savingCorrection"
+                :disabled="savingCorrection"
+                v-if="canView && selectedCorrection.approved === 0"
+              >
+                حفظ المتابعة
+                <v-icon> mdi-content-save</v-icon>
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+            v-if="
+              hasApproval &&
+                selectedCorrection.status > 0 &&
+                selectedCorrection.approved === 0
+            "
+            text
+            color="accent"
+            @click="updateCorrectionApproved"
+            :loading="savingCorrection"
+            :disabled="savingCorrection"
+          >
+            اعتماد التقرير
+            <v-icon> mdi-content-save</v-icon>
+          </v-btn>
+          <v-btn
+            text
+            color="red darken-1"
+            @click="correctionDlg = false"
+            :loading="savingCorrection"
+            :disabled="savingCorrection"
+          >
+            اغلاق
+            <v-icon> mdi-close</v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -353,6 +723,7 @@ export default {
     }
   },
   mounted() {
+    this.loadEmployee()
     AuditPlanService.listCheckListItem(this.auditPlanEncId)
       .then(response => {
         this.items = response.data
@@ -379,6 +750,90 @@ export default {
       })
   },
   methods: {
+    loadEmployee() {
+      this.loadingEmployee = true
+      EmployeeService.listAll()
+        .then(response => {
+          this.employees = response.data
+          this.loadingEmployee = false
+        })
+        .catch(error => {
+          this.loadingEmployee = false
+        })
+    },
+    updateCorrectionFollow() {
+      this.loadingCorrection = true
+      AuditPlanService.updateCorrectionFollow(this.selectedCorrection)
+        .then(res => {
+          this.$toast.success('تمت المتابعة بنجاح')
+          this.selectedCorrection = res.data
+          this.loadingCorrection = false
+        })
+        .catch(error => {
+          this.$toast.error('حدث خطأ ما رقم ' + error.response.data.id)
+          this.loadingCorrection = false
+        })
+    },
+    updateCorrectionApproved() {
+      this.loadingCorrection = true
+      AuditPlanService.updateCorrectionApproved(this.selectedCorrection)
+        .then(res => {
+          this.$toast.success('تمت الاعتماد بنجاح')
+          this.selectedCorrection = res.data
+          this.loadingCorrection = false
+        })
+        .catch(error => {
+          this.$toast.error('حدث خطأ ما رقم ' + error.response.data.id)
+          this.loadingCorrection = false
+        })
+    },
+    deleteCorrectionStep(item) {
+      const index = this.selectedCorrection.correctionSteps.indexOf(item)
+      if (index > -1) {
+        this.selectedCorrection.correctionSteps.splice(index, 1)
+      }
+    },
+    createCorrectionStep() {
+      this.selectedCorrectionStep = Object.assign({}, this.emptyCorrectionStep)
+    },
+    addCorrectionStep() {
+      this.selectedCorrection.correctionSteps.push(this.selectedCorrectionStep)
+      this.createCorrectionStep()
+    },
+    saveCorrection() {
+      this.savingCorrection = true
+      this.$confirm('هل تود فعلا حفظ التغييرات ؟').then(res => {
+        if (res) {
+          AuditPlanService.saveCorrectiveAction(this.selectedCorrection)
+            .then(response => {
+              this.$toast.success('تم الحفظ بنجاح')
+              this.savingCorrection = false
+            })
+            .catch(error => {
+              this.$toast.error(
+                'خطا في عملية الحفظ , رقم الخطا ' + error.response.data.id
+              )
+              this.savingCorrection = false
+            })
+        }
+      })
+    },
+    editCorrection(auditItem) {
+      this.loadingCorrection = true
+      this.correctionDlg = true
+      this.createCorrectionStep()
+      AuditPlanService.getCorrectiveAction(auditItem)
+        .then(res => {
+          this.selectedCorrection = Object.assign({}, res.data)
+          this.createCorrectionStep()
+          this.loadingCorrection = false
+        })
+        .catch(error => {
+          this.selectedCorrection = Object.assign({}, this.emptyCorrection)
+          this.selectedCorrection.auditItemId = auditItem.id
+          this.loadingCorrection = false
+        })
+    },
     loadEmployeeList() {
       EmployeeService.listByDepartment(this.selectedAuditPlan.department.encId)
         .then(res => {
@@ -491,21 +946,33 @@ export default {
       AuditPlanService.listTransactionByAuditPlan(this.selectedAuditPlan.encId)
         .then(response => {
           this.transList = response.data
-          this.trnsactionDlg = true
+          this.transactionDlg = true
         })
         .catch(error => {})
     }
   },
   data() {
     return {
+      executeDateMenu: false,
+      loadingEmployee: false,
+      employees: [],
+      loadingCorrection: false,
+      savingCorrection: false,
+      toDoDateMenu: false,
+      auditItemToCorrection: {},
+      immediateDateMenu: false,
+      rootReasonDateMenu: false,
+      descDateMenu: false,
+      correctionDlg: false,
       employeeList: [],
+      fullEmployeeList: [],
       auditResult: [
         { id: 0, name: 'غير محدد' },
         { id: 1, name: 'مطابق' },
         { id: 2, name: 'غير مطابق' },
         { id: 3, name: 'غير موجود' }
       ],
-      trnsactionDlg: false,
+      transactionDlg: false,
       transList: [],
       status: new Map(),
       rejectedType: 1,
@@ -518,6 +985,35 @@ export default {
       selectedAuditPlan: {},
       selectedItem: {},
       itemToEdit: {},
+      selectedCorrectionStep: {},
+      selectedCorrection: {},
+      emptyCorrection: {
+        id: -1,
+        encId: '-1',
+        description: '',
+        immediateCorrection: '',
+        rootReason: '',
+        rootReasonEmpId: null,
+        rootReasonDate: '',
+        immediateEmpId: null,
+        immediateDate: '',
+        descEmpId: null,
+        descDate: '',
+        auditItemId: -1,
+        correctionSteps: [],
+        approved: 0,
+        status: 0,
+        executeEmpId: null,
+        executeDate: '',
+        followDescription: ''
+      },
+      emptyCorrectionStep: {
+        id: -1,
+        encId: '-1',
+        description: '',
+        toDoDate: '',
+        orderNo: 1
+      },
       emptyItem: {
         id: -1,
         content: '',
@@ -527,6 +1023,38 @@ export default {
         remarks: '',
         encId: '-1'
       },
+      stepsHeader: [
+        {
+          text: 'مسلسل',
+          value: 'sn',
+          align: 'center',
+          sortable: false,
+          width: '10%'
+        },
+        {
+          text: 'الاجراء التصحيحي',
+          value: 'description',
+          align: 'center',
+          sortable: false,
+          filterable: true,
+          width: '65%'
+        },
+        {
+          text: 'موعد التنفيذ',
+          value: 'toDoDate',
+          align: 'center',
+          sortable: false,
+          filterable: true,
+          width: '15%'
+        },
+        {
+          text: '#',
+          value: 'action',
+          align: 'center',
+          sortable: false,
+          width: '10%'
+        }
+      ],
       transactionHeader: [
         {
           text: 'مسلسل',

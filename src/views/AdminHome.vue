@@ -27,7 +27,12 @@
                 </v-list-item-title>
               </v-list-item-content>
             </template>
-            <v-list-item v-for="(child, i) in item.children" :key="i" link>
+            <v-list-item
+              v-for="(child, i) in item.children"
+              :key="i"
+              link
+              :to="child.to"
+            >
               <v-list-item-action v-if="child.icon">
                 <v-icon>{{ child.icon }}</v-icon>
               </v-list-item-action>
@@ -258,7 +263,7 @@ export default {
         'icon-alt': 'mdi-chevron-down',
         text: 'المزيد',
         model: false,
-        children: [{ text: 'استيراد' }, { text: 'تصدير' }, { text: 'طباعة' }]
+        children: [{ icon: 'mdi-bug', text: 'الاخطاء', to: '/admin/Bug' }]
       }
     ]
   }),
@@ -301,5 +306,8 @@ export default {
   color: darkred;
   font-style: italic;
   font-weight: bold;
+}
+.clickable {
+  cursor: pointer;
 }
 </style>

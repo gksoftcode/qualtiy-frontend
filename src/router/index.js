@@ -18,6 +18,7 @@ import AdminLanding from '@/components/AdminLanding'
 import FilesManager from '@/views/admin/workGuide/FilesManager'
 import AuditPlan from '@/views/admin/audit/AuditPlan'
 import CheckListEditor from '@/views/admin/audit/CheckListEditor'
+import Bug from '@/views/admin/bug/Bug'
 
 Vue.use(VueRouter)
 
@@ -101,6 +102,12 @@ const routes = [
         name: 'WorkGuideEditorDept',
         props: true,
         component: WorkGuideEditor
+      },
+      {
+        path: '/admin/Bug',
+        name: 'Bugs',
+        props: true,
+        component: Bug
       }
     ]
   },

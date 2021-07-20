@@ -13,11 +13,16 @@
         <v-toolbar dense>
           <v-app-bar-nav-icon></v-app-bar-nav-icon>
           <v-spacer></v-spacer>
-          <v-text-field
-            v-model="dataTableRequest.data.textSearch"
-            @keypress.enter="loadData"
-            placeholder="البحث"
-          ></v-text-field>
+          <v-select
+            :items="years"
+            item-value="id"
+            item-text="name"
+            v-model="yearId"
+            @change="loadData"
+            dense
+            label="السنة"
+            clearable
+          ></v-select>
           <v-btn icon>
             <v-icon @click="loadData">mdi-magnify</v-icon>
           </v-btn>
@@ -253,6 +258,7 @@
 
 <script>
 import _ from 'lodash'
+import moment from 'moment'
 import AuditPlanService from '@/service/audit/AuditPlanService'
 import DepartmentService from '@/service/department/DepartmentService'
 import DataTableRequest from '@/model/request/DataTableRequest'
@@ -267,6 +273,9 @@ export default {
     this.status[10] = 'معتمد'
     this.status[11] = 'ارجاع نتائج'
     this.status[20] = 'معتمد نهائي'
+    for (var y = moment().year(); y > 2015; y--) {
+      this.years.push({ id: y, name: y })
+    }
   },
 
   computed: {
@@ -349,7 +358,7 @@ export default {
         this.dataTableRequest.sortDesc = false
       }
       this.dataTableRequest.data.data = {
-        yearId: 2021
+        yearId: this.yearId
       }
       AuditPlanService.search(this.dataTableRequest)
         .then(response => {
@@ -419,6 +428,8 @@ export default {
   },
   data() {
     return {
+      years: [],
+      yearId: moment().year(),
       status: new Map(),
       empDataSearch: [],
       emps: [],

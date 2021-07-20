@@ -110,11 +110,6 @@
     font-size: 13px;
 }
 
-.v-data-table-header,
-.v-data-footer {
-    font-family: bukraBold;
-}
-
 .v-data-table__wrapper table tbody td {
     font-family: bukraRegular;
     font-size: 12px !important;
@@ -136,4 +131,71 @@
 .v-label {
     font-family: bukraRegular !important;
     font-size: 13px !important;
+}
+
+.v-treeview-node__root::before {
+    background-color: var(--v-primary-base) !important;
+}
+
+.v-treeview-node__content .v-treeview-node__prepend .v-icon.theme--light {
+    color: var(--v-primary-base) !important;
+}
+
+.v-list-item__action .v-icon.theme--light {
+    color: var(--v-primary-base) !important;
+}
+
+.not-authorized-block {
+    text-align: center;
+}
+
+.not-authorized-block .v-icon {
+    color: var(--v-primary-base) !important;
+    font-size: 200px !important;
+}
+
+.Vue-Toastification__toast--error {
+    background-color: var(--v-error-darken2) !important;
+    color: #fff;
+}
+
+.v-main__wrap {
+    background: #f2f4f8;
+}
+
+
+/* .custom-heading {} */
+
+.custom-heading .v-card__title {
+    /* background: var(--v-primary-base); */
+    margin-bottom: 15px;
+}
+
+.custom-heading .v-card__title .v-toolbar__items {
+    border-bottom: 1px solid var(--v-primary-base);
+    padding-bottom: 10px;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.custom-heading .v-card__title .v-toolbar__items .v-icon.theme--light {
+    color: var(--v-primary-base) !important;
+}
+
+.custom-heading .v-card__title .v-toolbar__items .v-toolbar__title {
+    margin-right: 10px;
+    font-size: 1rem;
+}
+
+.v-data-table-header,
+.v-data-footer {
+    font-family: bukraBold;
+}
+
+.v-data-table-header {
+    background-color: var(--v-primary-base) !important;
+}
+
+.v-data-table-header tr th span {
+    color: var(--v-accent-lighten5) !important;
 }

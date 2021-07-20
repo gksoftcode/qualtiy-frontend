@@ -42,6 +42,45 @@ export default {
       }
     )
   },
+  saveCorrectiveAction: async correctiveAction => {
+    return await axios.post(
+      Paths.BASE_URL +
+        Paths.AUDIT_PLAN_PATH +
+        '/saveCorrectiveAction/' +
+        correctiveAction.encId,
+      correctiveAction,
+      {
+        headers: authHeader()
+      }
+    )
+  },
+  updateCorrectionApproved: async correctiveAction => {
+    return await axios.post(
+      Paths.BASE_URL +
+        Paths.AUDIT_PLAN_PATH +
+        '/updateCorrectionApproved/' +
+        correctiveAction.encId +
+        '/1',
+      {},
+      {
+        headers: authHeader()
+      }
+    )
+  },
+  updateCorrectionFollow: async correctiveAction => {
+    return await axios.post(
+      Paths.BASE_URL +
+        Paths.AUDIT_PLAN_PATH +
+        '/updateCorrectionFollow/' +
+        correctiveAction.encId +
+        '/' +
+        correctiveAction.status,
+      { key: 'remarks', value: correctiveAction.followDescription },
+      {
+        headers: authHeader()
+      }
+    )
+  },
   updateResultItem: async check_list_item => {
     return await axios.post(
       Paths.BASE_URL +
@@ -49,6 +88,18 @@ export default {
         '/updateResultItem/' +
         check_list_item.encId,
       check_list_item,
+      {
+        headers: authHeader()
+      }
+    )
+  },
+  getCorrectiveAction: async check_list_item => {
+    return await axios.post(
+      Paths.BASE_URL +
+        Paths.AUDIT_PLAN_PATH +
+        '/getCorrectiveAction/' +
+        check_list_item.id,
+      {},
       {
         headers: authHeader()
       }

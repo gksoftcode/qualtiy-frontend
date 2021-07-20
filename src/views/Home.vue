@@ -21,12 +21,12 @@
               activatable
               hoverable
             >
-              <template v-slot:prepend="{ item }" v-if="false">
-                <v-icon v-if="item.departmentList.length > 0">
+              <template v-slot:prepend="{ item }">
+                <v-icon v-show="item.departmentList.length > 0">
                   mdi-view-grid
                 </v-icon>
 
-                <v-icon v-if="item.departmentList.length === 0">
+                <v-icon v-show="item.departmentList.length === 0">
                   mdi-cube-outline
                 </v-icon>
               </template>
