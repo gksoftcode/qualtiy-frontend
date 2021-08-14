@@ -197,5 +197,5 @@
 }
 
 .v-data-table-header tr th span {
-    color: var(--v-accent-lighten5) !important;
+    color: white !important;
 }

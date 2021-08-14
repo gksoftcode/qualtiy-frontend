@@ -162,6 +162,7 @@ export default {
     } catch (e) {
       console.log(e)
     }
+    document.title = this.$route.meta.title
   },
   computed: {
     hasFullDepartment: function() {

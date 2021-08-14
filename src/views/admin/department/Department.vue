@@ -1,10 +1,10 @@
 <template>
-  <v-card>
+  <v-card elevation="2" class="custom-heading">
     <v-card-title>
-      <v-icon>
-        mdi-file-tree-outline mdi-flip-h
-      </v-icon>
       <v-toolbar-items>
+        <v-icon>
+          mdi-file-tree-outline mdi-flip-h
+        </v-icon>
         <v-toolbar-title>إدارة الوحدات الادارية</v-toolbar-title>
       </v-toolbar-items>
     </v-card-title>
@@ -29,10 +29,14 @@
           <v-btn :disabled="disableAdd" @click="editDepartmentFn" icon>
             <v-icon> mdi-square-edit-outline</v-icon>
           </v-btn>
-          <v-btn :disabled="disableAdd" @click="orderDlg = true" icon>
+          <v-btn :disabled="disableAdd || isLeaf" @click="orderDlg = true" icon>
             <v-icon> mdi-order-numeric-ascending</v-icon>
           </v-btn>
-          <v-btn :disabled="disableAdd" @click="deleteDepartment" icon>
+          <v-btn
+            :disabled="disableAdd || !isLeaf"
+            @click="deleteDepartment"
+            icon
+          >
             <v-icon>mdi-delete</v-icon>
           </v-btn>
           <v-btn icon>
@@ -223,14 +227,7 @@
       </v-dialog>
     </v-card-text>
     <v-card-text>
-      <v-alert
-        border="bottom"
-        icon="mdi-key-outline mdi-flip-h"
-        type="error"
-        :value="!hasAccess"
-      >
-        لاتملك الأحقية الكافية لاستخدام هذه الخدمة
-      </v-alert>
+      <error401 v-if="!hasAccess"></error401>
     </v-card-text>
   </v-card>
 </template>
@@ -243,9 +240,11 @@ import EmployeeService from '@/service/employee/EmployeeService'
 import DataTableResponse from '@/model/response/DataTableResponse'
 import DataTableRequest from '@/model/request/DataTableRequest'
 import { mapState } from 'vuex'
+import Error401 from '@/components/Error401'
 
 export default {
   components: {
+    Error401,
     EmployeeSelector,
     draggable
   },
@@ -260,6 +259,16 @@ export default {
         })
       } catch (e) {
         return false
+      }
+      return ha
+    },
+    isLeaf: function() {
+      let ha = false
+      if (
+        this.currentSelected &&
+        this.currentSelected.departmentList.length === 0
+      ) {
+        ha = true
       }
       return ha
     },
@@ -354,6 +363,7 @@ export default {
   },
   mounted() {
     this.loadTree()
+    document.title = this.$route.meta.title
   },
   methods: {
     showEmployeeSelector() {
@@ -405,11 +415,37 @@ export default {
       }
     },
     deleteDepartment() {
-      DepartmentService.deleteDepartment(this.currentSelected).then(
-        response => {
-          this.loadTree()
+      this.$confirm(
+        'هل تود حذف إدارة ' +
+          '<span class="dialog-primary-text">' +
+          this.currentSelected.name +
+          '</span>'
+      ).then(res => {
+        if (res) {
+          DepartmentService.delete(this.currentSelected)
+            .then(response => {
+              if (response.data.success === true) {
+                this.$toast.success('تم الحذف بنجاح')
+                this.loadTree()
+              } else {
+                this.$toast.error(
+                  'لايمكن حذف هذه الادارة , بسبب وجود بيانات مرتبطه بهذه الإدارة ..'
+                )
+              }
+            })
+            .catch(error => {
+              if (error.response.data.id) {
+                this.$toast.error(
+                  'هناك خطأ في عملية الحفظ ' +
+                    'رقم الخطأ ' +
+                    error.response.data.id
+                )
+              } else {
+                this.$toast.error('هناك خطأ في عملية الحفظ ')
+              }
+            })
         }
-      )
+      })
     },
     find(item, pid) {
       if (item.id === pid) {

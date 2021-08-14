@@ -1,5 +1,5 @@
 <template>
-  <v-card elevation="2">
+  <v-card elevation="2" class="custom-heading">
     <v-card-title>
       <v-toolbar-items>
         <v-icon>mdi-account-group </v-icon>
@@ -53,14 +53,16 @@
         </template>
 
         <template v-slot:item.action="{ item }">
-          <v-btn color="primary" icon @click="edit(item)">
-            <v-icon>
-              mdi-square-edit-outline
-            </v-icon>
-          </v-btn>
-          <v-btn color="orange darken-2" icon @click="resetPassword(item)">
-            <v-icon>mdi-lock-reset</v-icon>
-          </v-btn>
+          <v-flex>
+            <v-btn color="primary" icon @click="edit(item)">
+              <v-icon>
+                mdi-square-edit-outline
+              </v-icon>
+            </v-btn>
+            <v-btn color="error" icon @click="resetPassword(item)">
+              <v-icon>mdi-lock-reset</v-icon>
+            </v-btn>
+          </v-flex>
         </template>
       </v-data-table>
     </v-card-text>
@@ -325,14 +327,7 @@
       </v-dialog>
     </v-card-actions>
     <v-card-text>
-      <v-alert
-        border="bottom"
-        icon="mdi-key-outline mdi-flip-h"
-        type="error"
-        :value="!hasAccess"
-      >
-        لاتملك الأحقية الكافية لاستخدام هذه الخدمة
-      </v-alert>
+      <error401 v-if="!hasAccess"></error401>
     </v-card-text>
   </v-card>
 </template>
@@ -345,7 +340,9 @@ import JobService from '@/service/jobs/JobService'
 import DataTableRequest from '@/model/request/DataTableRequest'
 import DataTableResponse from '@/model/response/DataTableResponse'
 import { mapState } from 'vuex'
+import Error401 from '@/components/Error401'
 export default {
+  components: { Error401 },
   created() {
     this.dataTableRequest.data.textSearch = ''
     this.selectedEmployee = Object.assign({}, this.emptyEmployee)
@@ -445,7 +442,15 @@ export default {
             })
             .catch(error => {
               this.saving = false
-              this.$toast.error('هناك خطأ في عملية الحفظ')
+              if (error.response.data.id) {
+                this.$toast.error(
+                  'هناك خطأ في عملية الحفظ' +
+                    ' رقم الخطأ ' +
+                    error.response.data.id
+                )
+              } else {
+                this.$toast.error('هناك خطأ في عملية الحفظ')
+              }
             })
         }
       })
@@ -529,7 +534,7 @@ export default {
           align: 'center',
           sortable: false,
           filterable: true,
-          width: '10%'
+          width: '5%'
         },
         {
           text: 'اسم الموظف',
@@ -537,7 +542,7 @@ export default {
           align: 'center',
           sortable: true,
           filterable: true,
-          width: '40%'
+          width: '30%'
         },
         {
           text: 'الادارة',

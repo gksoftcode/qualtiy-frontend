@@ -22,11 +22,11 @@
               hoverable
             >
               <template v-slot:prepend="{ item }">
-                <v-icon v-show="item.departmentList.length > 0">
+                <v-icon v-if="item.departmentList.length > 0">
                   mdi-view-grid
                 </v-icon>
 
-                <v-icon v-show="item.departmentList.length === 0">
+                <v-icon v-if="item.departmentList.length == 0">
                   mdi-cube-outline
                 </v-icon>
               </template>
@@ -100,6 +100,7 @@ export default {
   name: 'Home',
   components: { Landing, WorkGuide },
   mounted() {
+    document.title = this.$route.meta.title
     this.loadDepartmentTree()
   },
   computed: {

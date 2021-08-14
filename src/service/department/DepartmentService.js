@@ -26,9 +26,9 @@ export default {
       }
     )
   },
-  deleteDepartment: async department => {
+  delete: async department => {
     return await axios.delete(
-      Paths.BASE_URL + Paths.DEPARTMENT_PATH + '/' + this.activeDepartment[0],
+      Paths.BASE_URL + Paths.DEPARTMENT_PATH + '/' + department.id,
       {
         headers: authHeader()
       }

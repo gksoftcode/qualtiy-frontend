@@ -1,7 +1,7 @@
 import AuthService from '@/service/AuthService'
 import JWT from '@/util/JWT'
 import router from '@/router'
-const token = localStorage.getItem('token')
+const token = sessionStorage.getItem('token')
 const initialState = token
   ? { status: { loggedIn: true }, employee: JWT.getUser(token) }
   : { status: { loggedIn: false }, employee: null }
@@ -36,7 +36,7 @@ export const auth = {
   mutations: {
     loginSuccess(state, token) {
       state.status.loggedIn = true
-      localStorage.setItem('token', token)
+      sessionStorage.setItem('token', token)
       state.employee = JWT.getUser(token)
     },
     loginFailure(state) {

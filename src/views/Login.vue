@@ -2,6 +2,89 @@
   <div class="home">
     <v-main>
       <v-container>
+        <div
+          class="bg-image"
+          v-bind:style="{
+            backgroundImage: 'url(' + require('../assets/logo2.png') + ')'
+          }"
+        ></div>
+        <v-layout wrap dark>
+          <v-flex sm12 md8 offset-md2>
+            <v-card
+              elevation="1"
+              class="mt-16 pt-3 pr-3 pb-3 pl-3"
+              light
+              tag="section"
+              :loading="working"
+            >
+              <v-card-title>
+                <v-layout align-center justify-space-between>
+                  <h3 class="headline">
+                    <v-card-title>
+                      <!-- <v-icon class="ml-4">mdi-login-variant mdi-flip-h</v-icon> -->
+                      بوابة بلدية الحمرية
+                    </v-card-title>
+                    <v-card-subtitle>
+                      لوحة الدخول
+                    </v-card-subtitle>
+                  </h3>
+                  <v-flex>
+                    <v-img
+                      alt="بوابة بلدية الحمرية"
+                      class="ml-2 float-left"
+                      contain
+                      height="120px"
+                      width="120px"
+                      position="center left"
+                      :src="require('../assets/logo2.png')"
+                    ></v-img>
+                  </v-flex>
+                </v-layout>
+              </v-card-title>
+              <v-divider></v-divider>
+              <v-card-text>
+                <p>
+                  قم بتسجيل الدخول باستخدام اسم المستخدم وكلمة المرور الخاصين
+                  بك:
+                </p>
+                <v-form>
+                  <v-text-field
+                    outlined
+                    autofocus
+                    prepend-inner-icon="mdi-account-box"
+                    v-model="user.username"
+                    label="اسم المستخدم"
+                    type="text"
+                  />
+                  <v-text-field
+                    outlined
+                    hide-details
+                    type="password"
+                    prepend-inner-icon="mdi-key"
+                    v-model="user.password"
+                    label="كلمة المرور"
+                  />
+                </v-form>
+              </v-card-text>
+              <v-divider></v-divider>
+              <v-card-actions class="pa-3">
+                <v-btn
+                  color="primary"
+                  :loading="working"
+                  :disabled="working"
+                  @click="login()"
+                >
+                  <v-icon right>mdi-login-variant mdi-flip-h</v-icon>
+                  تسجيل دخول
+                </v-btn>
+                <v-btn color="red" plain :disabled="working">
+                  إلغاء
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-flex>
+        </v-layout>
+        <!-- 
         <v-layout align-center justify-center>
           <v-card width="50%" elevation="24" :loading="working">
             <v-card-title>
@@ -51,7 +134,7 @@
               </v-btn>
             </v-card-actions>
           </v-card>
-        </v-layout>
+        </v-layout> -->
       </v-container>
     </v-main>
   </div>
@@ -66,6 +149,9 @@ export default {
     '$store.state.auth.status.loggedIn': function() {
       console.log(this.$store.state.auth.status.loggedIn)
     }
+  },
+  mounted() {
+    document.title = this.$route.meta.title
   },
   methods: {
     login() {
@@ -92,4 +178,16 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.bg-image {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: inherit;
+  height: 100vh;
+  z-index: 0;
+  background-repeat: repeat;
+  opacity: 0.03;
+  background-size: 300px;
+}
+</style>

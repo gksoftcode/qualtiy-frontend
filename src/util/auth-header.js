@@ -1,5 +1,5 @@
 export default function authHeader() {
-  const token = localStorage.getItem('token')
+  const token = sessionStorage.getItem('token')
   if (token) {
     return {
       Authorization: 'Bearer ' + token,
@@ -10,7 +10,7 @@ export default function authHeader() {
   }
 }
 export function authHeaderMultipart() {
-  const token = localStorage.getItem('token')
+  const token = sessionStorage.getItem('token')
   if (token) {
     return {
       Authorization: 'Bearer ' + token,

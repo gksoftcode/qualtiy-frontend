@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-card elevation="2">
+    <v-card elevation="2" class="custom-heading">
       <v-card-title>
         <v-toolbar-items>
           <v-icon>
@@ -82,15 +82,9 @@
           </template>
         </v-data-table>
       </v-card-text>
+
       <v-card-text>
-        <v-alert
-          border="bottom"
-          icon="mdi-key-outline mdi-flip-h"
-          type="error"
-          :value="!hasAccess"
-        >
-          لاتملك الأحقية الكافية لاستخدام هذه الخدمة
-        </v-alert>
+        <error401 v-if="!hasAccess"></error401>
       </v-card-text>
       <v-card-actions>
         <v-dialog dir="rtl" v-model="showDialog" width="60%">
@@ -179,7 +173,9 @@ import JobService from '@/service/jobs/JobService'
 import DataTableRequest from '@/model/request/DataTableRequest'
 import DataTableResponse from '@/model/response/DataTableResponse'
 import { mapState } from 'vuex'
+import Error401 from '@/components/Error401'
 export default {
+  components: { Error401 },
   created() {
     this.dataTableRequest.data.textSearch = ''
   },
@@ -199,7 +195,9 @@ export default {
     },
     ...mapState('auth', ['employee'])
   },
-  mounted() {},
+  mounted() {
+    document.title = this.$route.meta.title
+  },
   methods: {
     loadData() {
       this.loading = true

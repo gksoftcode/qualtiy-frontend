@@ -37,7 +37,7 @@
             </v-btn>
             <v-btn
               text
-              color="green"
+              color="primary"
               v-if="
                 hasApproval &&
                   (selectedAuditPlan.status === 1 ||
@@ -50,7 +50,7 @@
             </v-btn>
             <v-btn
               text
-              color="green"
+              color="primary"
               v-if="
                 hasApproval &&
                   (selectedAuditPlan.status === 10 ||
@@ -63,7 +63,7 @@
             </v-btn>
             <v-btn
               text
-              color="red"
+              color="error"
               v-if="hasApproval && selectedAuditPlan.status === 10"
               @click="showRejectedDlg(11)"
               class="float-left"
@@ -72,7 +72,7 @@
             </v-btn>
             <v-btn
               text
-              color="red"
+              color="warning"
               v-if="hasApproval && selectedAuditPlan.status === 0"
               @click="showRejectedDlg(1)"
               class="float-left"
@@ -83,204 +83,556 @@
         </v-row>
       </v-card-text>
     </v-card>
-    <template v-for="(item, index) in items">
-      <v-hover :key="item.id">
-        <template v-slot:default="{ hover }">
-          <v-card :elevation="hover ? 3 : 1" class="mt-3">
-            <v-card-text>
-              <v-row dense>
-                <v-col cols="12">
-                  <p>
-                    <span class="wise-c-Title" v-text="index + 1 + ' - '">
-                    </span>
-                    <span v-text="item.content"> </span>
-                  </p>
-                </v-col>
-              </v-row>
-              <v-row dense v-show="itemToEdit.id === item.id">
-                <v-col cols="12">
-                  <v-textarea
-                    rows="2"
-                    outlined
-                    dense
-                    label="نص السؤال"
-                    v-model="itemToEdit.content"
-                  ></v-textarea>
-                </v-col>
-              </v-row>
-            </v-card-text>
-            <v-card-actions
+    <v-card class="mt-1">
+      <v-card-text>
+        <v-tabs v-model="tab" @change="tabChange">
+          <v-tab href="#checkList">
+            قائمة التدقيق
+          </v-tab>
+          <v-tab href="#correction" :disabled="selectedAuditPlan.status < 10">
+            إجراءات التصحيح
+          </v-tab>
+          <v-tab href="#extraData" :disabled="selectedAuditPlan.status < 10">
+            الملاحظات والتوصيات
+          </v-tab>
+        </v-tabs>
+        <v-tabs-items v-model="tab">
+          <v-tab-item value="checkList">
+            <template v-for="(item, index) in items">
+              <v-hover :key="item.id">
+                <template v-slot:default="{ hover }">
+                  <v-card :elevation="hover ? 3 : 1" class="mt-3">
+                    <v-card-text>
+                      <v-row dense>
+                        <v-col cols="12">
+                          <p>
+                            <span
+                              class="wise-c-Title"
+                              v-text="index + 1 + ' - '"
+                            >
+                            </span>
+                            <span v-text="item.content"> </span>
+                          </p>
+                        </v-col>
+                      </v-row>
+                      <v-row dense v-show="itemToEdit.id === item.id">
+                        <v-col cols="12">
+                          <v-textarea
+                            rows="2"
+                            outlined
+                            dense
+                            label="نص السؤال"
+                            v-model="itemToEdit.content"
+                          ></v-textarea>
+                        </v-col>
+                      </v-row>
+                    </v-card-text>
+                    <v-card-actions
+                      v-if="
+                        (canView || hasApproval) &&
+                          selectedAuditPlan.status < 10
+                      "
+                    >
+                      <v-row dense>
+                        <v-col cols="12">
+                          <v-btn
+                            text
+                            color="primary"
+                            v-show="itemToEdit.id === item.id"
+                            @click="saveEditItem(item)"
+                            :disabled="itemSaving"
+                            :loading="itemSaving"
+                          >
+                            حفظ
+                            <v-icon>
+                              mdi-content-save
+                            </v-icon>
+                          </v-btn>
+                          <v-btn
+                            text
+                            class="mr-2"
+                            dark
+                            color="error"
+                            v-show="itemToEdit.id === item.id"
+                            @click="cancelEditItem"
+                            :disabled="itemSaving"
+                          >
+                            إلغاء
+                            <v-icon>
+                              mdi-close
+                            </v-icon>
+                          </v-btn>
+                          <v-btn
+                            text
+                            class="mr-2"
+                            color="primary"
+                            v-show="itemToEdit.id !== item.id"
+                            dark
+                            @click="editItem(item)"
+                          >
+                            تحرير
+                            <v-icon>
+                              mdi-playlist-edit
+                            </v-icon>
+                          </v-btn>
+                          <v-btn
+                            text
+                            class="mr-2"
+                            v-show="itemToEdit.id !== item.id"
+                            color="error"
+                            dark
+                            @click="deleteItem(item)"
+                          >
+                            حذف
+                            <v-icon>
+                              mdi-trash-can
+                            </v-icon>
+                          </v-btn>
+                        </v-col>
+                      </v-row>
+                    </v-card-actions>
+                    <v-card-actions
+                      v-if="
+                        (canView || hasApproval) &&
+                          (selectedAuditPlan.status === 10 ||
+                            selectedAuditPlan.status === 11)
+                      "
+                    >
+                      <v-row dense>
+                        <v-col cols="2">
+                          <v-select
+                            outlined
+                            dense
+                            label="حالة الاجراء"
+                            :items="auditResult"
+                            item-text="name"
+                            item-value="id"
+                            v-model="item.auditResult"
+                          >
+                          </v-select>
+                        </v-col>
+                        <v-col cols="3">
+                          <v-select
+                            clearable
+                            outlined
+                            dense
+                            label="الموظف"
+                            :items="employeeList"
+                            item-text="fullName"
+                            item-value="id"
+                            v-model="item.employeeId"
+                          >
+                          </v-select>
+                        </v-col>
+                        <v-col cols="7">
+                          <v-textarea
+                            rows="1"
+                            v-model="item.remarks"
+                            dense
+                            outlined
+                            label="الملاحظات"
+                          ></v-textarea>
+                        </v-col>
+                        <v-col cols="2">
+                          <v-btn
+                            text
+                            color="primary"
+                            @click="updateResultItem(item)"
+                            :disabled="itemSaving"
+                            :loading="itemSaving"
+                          >
+                            حفظ
+                            <v-icon>
+                              mdi-content-save
+                            </v-icon>
+                          </v-btn>
+                        </v-col>
+                        <v-col cols="2" v-show="item.auditResult > 1">
+                          <v-btn
+                            text
+                            color="accent"
+                            @click="editCorrection(item)"
+                            :disabled="itemSaving"
+                            :loading="itemSaving"
+                          >
+                            اجراء تصحيح
+                            <v-icon>
+                              mdi-tooltip-check
+                            </v-icon>
+                          </v-btn>
+                        </v-col>
+                      </v-row>
+                    </v-card-actions>
+                  </v-card>
+                </template>
+              </v-hover>
+            </template>
+            <v-card
+              class="mt-6"
               v-if="(canView || hasApproval) && selectedAuditPlan.status < 10"
             >
-              <v-row dense>
-                <v-col cols="12">
-                  <v-btn
-                    text
-                    color="primary"
-                    v-show="itemToEdit.id === item.id"
-                    @click="saveEditItem(item)"
-                    :disabled="itemSaving"
-                    :loading="itemSaving"
-                  >
-                    حفظ
-                    <v-icon>
-                      mdi-content-save
-                    </v-icon>
-                  </v-btn>
-                  <v-btn
-                    text
-                    class="mr-2"
-                    dark
-                    color="red lighten-1"
-                    v-show="itemToEdit.id === item.id"
-                    @click="cancelEditItem"
-                    :disabled="itemSaving"
-                  >
-                    إلغاء
-                    <v-icon>
-                      mdi-close
-                    </v-icon>
-                  </v-btn>
-                  <v-btn
-                    text
-                    class="mr-2"
-                    color="green lighten-1"
-                    v-show="itemToEdit.id !== item.id"
-                    dark
-                    @click="editItem(item)"
-                  >
-                    تحرير
-                    <v-icon>
-                      mdi-playlist-edit
-                    </v-icon>
-                  </v-btn>
-                  <v-btn
-                    text
-                    class="mr-2"
-                    v-show="itemToEdit.id !== item.id"
-                    color="red lighten-1"
-                    dark
-                    @click="deleteItem(item)"
-                  >
-                    حذف
-                    <v-icon>
-                      mdi-trash-can
-                    </v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-card-actions>
-            <v-card-actions
-              v-if="
-                (canView || hasApproval) &&
-                  (selectedAuditPlan.status === 10 ||
-                    selectedAuditPlan.status === 11)
-              "
-            >
-              <v-row dense>
-                <v-col cols="2">
-                  <v-select
-                    outlined
-                    dense
-                    label="حالة الاجراء"
-                    :items="auditResult"
-                    item-text="name"
-                    item-value="id"
-                    v-model="item.auditResult"
-                  >
-                  </v-select>
-                </v-col>
-                <v-col cols="3">
-                  <v-select
-                    clearable
-                    outlined
-                    dense
-                    label="الموظف"
-                    :items="employeeList"
-                    item-text="fullName"
-                    item-value="id"
-                    v-model="item.employeeId"
-                  >
-                  </v-select>
-                </v-col>
-                <v-col cols="7">
-                  <v-textarea
-                    rows="1"
-                    v-model="item.remarks"
-                    dense
-                    outlined
-                    label="الملاحظات"
-                  ></v-textarea>
-                </v-col>
-                <v-col cols="2">
-                  <v-btn
-                    text
-                    color="primary"
-                    @click="updateResultItem(item)"
-                    :disabled="itemSaving"
-                    :loading="itemSaving"
-                  >
-                    حفظ
-                    <v-icon>
-                      mdi-content-save
-                    </v-icon>
-                  </v-btn>
-                </v-col>
-                <v-col cols="2" v-show="item.auditResult > 1">
-                  <v-btn
-                    text
-                    color="accent"
-                    @click="editCorrection(item)"
-                    :disabled="itemSaving"
-                    :loading="itemSaving"
-                  >
-                    اجراء تصحيح
-                    <v-icon>
-                      mdi-content-save
-                    </v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-card-actions>
-          </v-card>
-        </template>
-      </v-hover>
-    </template>
-    <v-card
-      class="mt-6"
-      v-if="(canView || hasApproval) && selectedAuditPlan.status < 10"
-    >
-      <v-card-text>
-        <v-row dense>
-          <v-col cols="12">
-            <v-textarea
-              rows="2"
-              label="نص السؤال"
-              dense
-              outlined
-              v-model="selectedItem.content"
-            ></v-textarea>
-          </v-col>
-        </v-row>
+              <v-card-text>
+                <v-row dense>
+                  <v-col cols="12">
+                    <v-textarea
+                      rows="2"
+                      label="نص السؤال"
+                      dense
+                      outlined
+                      v-model="selectedItem.content"
+                    ></v-textarea>
+                  </v-col>
+                </v-row>
+              </v-card-text>
+              <v-card-actions>
+                <v-row dense>
+                  <v-col cols="12">
+                    <v-btn
+                      color="primary"
+                      :disabled="saving"
+                      :loading="saving"
+                      @click="save"
+                    >
+                      حفظ
+                      <v-icon>
+                        mdi-content-save
+                      </v-icon>
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </v-card-actions>
+            </v-card>
+          </v-tab-item>
+          <v-tab-item value="correction">
+            <v-card>
+              <v-card-text>
+                <v-row dense dir="LTR" class="mb-2">
+                  <v-col cols="4">
+                    <doughnut-chart
+                      :idx="idx"
+                      ref="chart_1"
+                      :width="150"
+                      :height="150"
+                      :options="correctionChartOptions"
+                      :chart-data="correctionChartData"
+                    ></doughnut-chart>
+                  </v-col>
+                </v-row>
+                <v-data-table
+                  :headers="correctionHeader"
+                  :items="tableResponse.data"
+                  :loading="loadingCorrectionTab"
+                  item-key="id"
+                  :options.sync="dataTableOptions"
+                  :server-items-length="tableResponse.total"
+                >
+                  <template v-slot:no-data>
+                    <v-row>
+                      <v-col cols="12" class="text-center">
+                        لاتوجد سجلات للعرض
+                      </v-col>
+                    </v-row>
+                  </template>
+                  <template v-slot:item.sn="{ item }">
+                    {{
+                      dataTableOptions.itemsPerPage *
+                        (dataTableOptions.page - 1) +
+                        tableResponse.data.indexOf(item) +
+                        1
+                    }}
+                  </template>
+                  <template v-slot:item.status="{ item }">
+                    <span
+                      class="ms-2 text-subtitle-2 accent--text"
+                      v-text="correctionStatus[item.status]"
+                    >
+                    </span>
+                  </template>
+                  <template v-slot:item.approved="{ item }">
+                    <span
+                      class="ms-2 text-subtitle-2 accent--text"
+                      v-text="approvedStatus[item.approved]"
+                    >
+                    </span>
+                  </template>
+                  <template v-slot:item.descEmployee="{ item }">
+                    <span
+                      v-text="item.descEmployee.fullName"
+                      v-if="item.descEmployee"
+                    ></span>
+                  </template>
+                  <template v-slot:item.action="{ item }">
+                    <v-btn
+                      color="primary"
+                      icon
+                      @click="editCorrectionById(item.auditItemId)"
+                    >
+                      <v-icon>
+                        mdi-tooltip-check
+                      </v-icon>
+                    </v-btn>
+                    <v-btn
+                      color="error"
+                      icon
+                      @click="deleteCorrectionById(item.encId)"
+                    >
+                      <v-icon>
+                        mdi-trash-can
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                </v-data-table>
+              </v-card-text>
+            </v-card>
+          </v-tab-item>
+          <v-tab-item value="extraData">
+            <v-card>
+              <v-card-text>
+                <v-row dense>
+                  <v-col cols="12">
+                    <fieldset class="wc-fieldset">
+                      <legend>
+                        1. الهيكل التنظيمي / المهام والمسؤوليات
+                        <v-btn
+                          icon
+                          color="primary"
+                          @click="createNewExtraData(1)"
+                        >
+                          <v-icon>
+                            mdi-plus
+                          </v-icon>
+                        </v-btn>
+                      </legend>
+                      <template v-for="item in extraList1">
+                        <v-row dense :key="item.id">
+                          <v-col cols="11">
+                            <span class="bullet">
+                              {{ extraList1.indexOf(item) + 1 }} -
+                            </span>
+                            <span v-text="item.description"></span>
+                          </v-col>
+                          <v-col cols="1">
+                            <v-btn
+                              icon
+                              color="error"
+                              @click="deleteExtra(item)"
+                            >
+                              <v-icon>mdi-trash-can</v-icon>
+                            </v-btn>
+                          </v-col>
+                        </v-row>
+                      </template>
+                    </fieldset>
+                  </v-col>
+                </v-row>
+                <v-row dense>
+                  <v-col cols="12">
+                    <fieldset class="wc-fieldset">
+                      <legend>
+                        2. تعديلات على الادلة وطرق العمل
+                        <v-btn
+                          icon
+                          color="primary"
+                          @click="createNewExtraData(2)"
+                        >
+                          <v-icon>
+                            mdi-plus
+                          </v-icon>
+                        </v-btn>
+                      </legend>
+                      <template v-for="item in extraList2">
+                        <v-row dense :key="item.id">
+                          <v-col cols="11">
+                            <span class="bullet">
+                              {{ extraList2.indexOf(item) + 1 }} -
+                            </span>
+                            <span v-text="item.description"></span>
+                          </v-col>
+                          <v-col cols="1">
+                            <v-btn
+                              icon
+                              color="error"
+                              @click="deleteExtra(item)"
+                            >
+                              <v-icon>mdi-trash-can</v-icon>
+                            </v-btn>
+                          </v-col>
+                        </v-row>
+                      </template>
+                    </fieldset>
+                  </v-col>
+                </v-row>
+                <v-row dense>
+                  <v-col cols="12">
+                    <fieldset class="wc-fieldset">
+                      <legend>
+                        3. التحسينات التي تمت على النظام والعمليات
+                        <v-btn
+                          icon
+                          color="primary"
+                          @click="createNewExtraData(3)"
+                        >
+                          <v-icon>
+                            mdi-plus
+                          </v-icon>
+                        </v-btn>
+                      </legend>
+                      <template v-for="item in extraList3">
+                        <v-row dense :key="item.id">
+                          <v-col cols="11">
+                            <span class="bullet">
+                              {{ extraList3.indexOf(item) + 1 }} -
+                            </span>
+                            <span v-text="item.description"></span>
+                          </v-col>
+                          <v-col cols="1">
+                            <v-btn
+                              icon
+                              color="error"
+                              @click="deleteExtra(item)"
+                            >
+                              <v-icon>mdi-trash-can</v-icon>
+                            </v-btn>
+                          </v-col>
+                        </v-row>
+                      </template>
+                    </fieldset>
+                  </v-col>
+                </v-row>
+                <v-row dense>
+                  <v-col cols="12">
+                    <fieldset class="wc-fieldset">
+                      <legend>
+                        4. نقاط القوة
+                        <v-btn
+                          icon
+                          color="primary"
+                          @click="createNewExtraData(4)"
+                        >
+                          <v-icon>
+                            mdi-plus
+                          </v-icon>
+                        </v-btn>
+                      </legend>
+                      <template v-for="item in extraList4">
+                        <v-row dense :key="item.id">
+                          <v-col cols="11">
+                            <span class="bullet">
+                              {{ extraList4.indexOf(item) + 1 }} -
+                            </span>
+                            <span v-text="item.description"></span>
+                          </v-col>
+                          <v-col cols="1">
+                            <v-btn
+                              icon
+                              color="error"
+                              @click="deleteExtra(item)"
+                            >
+                              <v-icon>mdi-trash-can</v-icon>
+                            </v-btn></v-col
+                          >
+                        </v-row>
+                      </template>
+                    </fieldset>
+                  </v-col>
+                </v-row>
+                <v-row dense>
+                  <v-col cols="12">
+                    <fieldset class="wc-fieldset">
+                      <legend>
+                        5. نقاط الضعف
+                        <v-btn
+                          icon
+                          color="primary"
+                          @click="createNewExtraData(5)"
+                        >
+                          <v-icon>
+                            mdi-plus
+                          </v-icon>
+                        </v-btn>
+                      </legend>
+                      <template v-for="item in extraList5">
+                        <v-row dense :key="item.id">
+                          <v-col cols="11">
+                            <span class="bullet">
+                              {{ extraList5.indexOf(item) + 1 }} -
+                            </span>
+                            <span v-text="item.description"></span>
+                          </v-col>
+                          <v-col cols="1">
+                            <v-btn
+                              icon
+                              color="error"
+                              @click="deleteExtra(item)"
+                            >
+                              <v-icon>mdi-trash-can</v-icon>
+                            </v-btn>
+                          </v-col>
+                        </v-row>
+                      </template>
+                    </fieldset>
+                  </v-col>
+                </v-row>
+                <v-row dense>
+                  <v-col cols="12">
+                    <fieldset class="wc-fieldset">
+                      <legend>
+                        6. الفرص المتاحة للتحسين والتطوير
+                        <v-btn
+                          icon
+                          color="primary"
+                          @click="createNewExtraData(6)"
+                        >
+                          <v-icon>
+                            mdi-plus
+                          </v-icon>
+                        </v-btn>
+                      </legend>
+                      <template v-for="item in extraList6">
+                        <v-row dense :key="item.id">
+                          <v-col cols="11">
+                            <span class="bullet">
+                              {{ extraList6.indexOf(item) + 1 }} -
+                            </span>
+                            <span v-text="item.description"></span>
+                          </v-col>
+                          <v-col cols="1">
+                            <v-btn
+                              icon
+                              color="error"
+                              @click="deleteExtra(item)"
+                            >
+                              <v-icon>mdi-trash-can</v-icon>
+                            </v-btn>
+                          </v-col>
+                        </v-row>
+                      </template>
+                    </fieldset>
+                  </v-col>
+                </v-row>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  v-if="
+                    (hasApproval || canView) &&
+                      (selectedAuditPlan.status === 10 ||
+                        selectedAuditPlan.status === 11)
+                  "
+                  :loading="extraSaving"
+                  :disabled="extraSaving"
+                  color="primary"
+                  @click="saveAuditPlan"
+                >
+                  حفظ التوصيات و الملاحظات
+                  <v-icon>mdi-content-save </v-icon>
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-tab-item>
+        </v-tabs-items>
       </v-card-text>
-      <v-card-actions>
-        <v-row dense>
-          <v-col cols="12">
-            <v-btn
-              color="primary"
-              :disabled="saving"
-              :loading="saving"
-              @click="save"
-            >
-              حفظ
-              <v-icon>
-                mdi-content-save
-              </v-icon>
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-card-actions>
     </v-card>
+
     <v-dialog v-model="rejectDlg" width="50%">
       <v-card>
         <v-card-title>
@@ -305,7 +657,7 @@
             متابعة
             <v-icon> </v-icon>
           </v-btn>
-          <v-btn dark color="red" @click="rejectDlg = false">
+          <v-btn dark color="error" @click="rejectDlg = false">
             إغلاق
             <v-icon> </v-icon>
           </v-btn>
@@ -318,23 +670,27 @@
           الاجراءات
         </v-card-title>
         <v-card-text>
-          <v-data-table
-            :items="transList"
-            item-key="createdAt"
-            disable-pagination
-            hide-default-footer
-            :headers="transactionHeader"
-          >
-            <template v-slot:item.sn="{ item }">
-              {{ transList.indexOf(item) + 1 }}
-            </template>
-            <template v-slot:item.actionType="{ item }">
-              {{ status[item.actionType] }}
-            </template>
-            <template v-slot:item.createdAt="{ item }">
-              {{ item.createdAt | formatDate }}
-            </template>
-          </v-data-table>
+          <v-row>
+            <v-col cols="12">
+              <v-data-table
+                :items="transList"
+                item-key="createdAt"
+                disable-pagination
+                hide-default-footer
+                :headers="transactionHeader"
+              >
+                <template v-slot:item.sn="{ item }">
+                  {{ transList.indexOf(item) + 1 }}
+                </template>
+                <template v-slot:item.actionType="{ item }">
+                  {{ status[item.actionType] }}
+                </template>
+                <template v-slot:item.createdAt="{ item }">
+                  {{ item.createdAt | formatDate }}
+                </template>
+              </v-data-table>
+            </v-col>
+          </v-row>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -507,7 +863,7 @@
               </v-row>
             </v-card-text>
           </v-card>
-          <v-card>
+          <v-card class="mt-1">
             <v-card-text>
               <v-row dense>
                 <v-col cols="8">
@@ -568,7 +924,7 @@
                       <v-tooltip bottom>
                         <template v-slot:activator="{ on, attrs }">
                           <v-btn
-                            color="red darken-1"
+                            color="error"
                             icon
                             v-bind="attrs"
                             v-on="on"
@@ -661,6 +1017,37 @@
                     rows="2"
                   ></v-textarea>
                 </v-col>
+                <v-col cols="4"> </v-col>
+              </v-row>
+              <v-row v-if="selectedCorrection.followEmployee">
+                <v-col cols="12">
+                  <span class="wise-c-Title">
+                    متابعة :
+                  </span>
+                  <span
+                    class="primary-text me-2"
+                    v-text="selectedCorrection.followEmployee.fullName"
+                  ></span>
+                  <span
+                    class="accent-text"
+                    v-text="selectedCorrection.followDate"
+                  ></span>
+                </v-col>
+              </v-row>
+              <v-row v-if="selectedCorrection.approvedEmployee">
+                <v-col cols="12">
+                  <span class="wise-c-Title">
+                    اعتماد :
+                  </span>
+                  <span
+                    class="primary-text me-2"
+                    v-text="selectedCorrection.approvedEmployee.fullName"
+                  ></span>
+                  <span
+                    class="accent-text"
+                    v-text="selectedCorrection.approvedDate"
+                  ></span>
+                </v-col>
               </v-row>
             </v-card-text>
             <v-card-actions>
@@ -696,13 +1083,44 @@
           </v-btn>
           <v-btn
             text
-            color="red darken-1"
+            color="error"
             @click="correctionDlg = false"
             :loading="savingCorrection"
             :disabled="savingCorrection"
           >
             اغلاق
             <v-icon> mdi-close</v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="extraDataDlg" width="60%">
+      <v-card>
+        <v-card-title>
+          الملاحظات والتوصيات
+        </v-card-title>
+        <v-card-text>
+          <v-row dense>
+            <v-col cols="12">
+              <v-text-field
+                v-model="selectedExtraData.description"
+                dense
+                label="الوصف"
+                outlined
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn text color="primary" @click="saveExtra">
+            حفظ
+            <v-icon> mdi-content-save</v-icon>
+          </v-btn>
+          <v-btn text color="error" @click="extraDataDlg = false">
+            إغلاق
+            <v-icon>
+              mdi-close
+            </v-icon>
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -715,7 +1133,12 @@ import AuditPlanService from '@/service/audit/AuditPlanService'
 import _ from 'lodash'
 import { mapState } from 'vuex'
 import EmployeeService from '@/service/employee/EmployeeService'
+import DataTableResponse from '@/model/response/DataTableResponse'
+import DataTableRequest from '@/model/request/DataTableRequest'
+import DoughnutChart from '@/components/charts/DoughnutChart'
+import colors from 'vuetify/lib/util/colors'
 export default {
+  components: { DoughnutChart },
   props: {
     auditPlanEncId: {
       type: String,
@@ -744,12 +1167,84 @@ export default {
         this.emptyItem.auditPlanId = this.selectedAuditPlan.id
         this.loadEmployeeList()
         this.loadingAuditPlan = false
+        this.createItem()
       })
       .catch(error => {
         this.loadingAuditPlan = false
       })
+    document.title = this.$route.meta.title
+  },
+  watch: {
+    dataTableOptions: {
+      handler(newVal, oldVal) {
+        this.listCorrectionByAudit()
+      },
+      deep: true
+    }
   },
   methods: {
+    tabChange() {
+      if (this.tab === 'correction') {
+        this.listCorrectionByAudit()
+      }
+    },
+    deleteCorrectionById(encId) {
+      this.$confirm('هل تود فعلا حذف هذا الاجراء').then(res => {
+        if (res) {
+          AuditPlanService.deleteCorrectiveAction(encId)
+            .then(res => {
+              this.listCorrectionByAudit()
+            })
+            .catch(error => {
+              if (error.response.data.id) {
+                this.$toast.error(
+                  'هناك خطأ في عملية الحذف' +
+                    ' رقم الخطاء ' +
+                    error.response.data.id
+                )
+              } else {
+                this.$toast.error('هناك خطأ في عملية الحذف')
+              }
+            })
+        }
+      })
+    },
+    listCorrectionByAudit() {
+      this.loadingCorrectionTab = true
+      this.dataTableRequest.currentPage = this.dataTableOptions.page - 1
+      this.dataTableRequest.pageSize = this.dataTableOptions.itemsPerPage
+      if (
+        this.dataTableOptions.sortBy &&
+        this.dataTableOptions.sortBy.length > 0
+      ) {
+        this.dataTableRequest.sortBy = this.dataTableOptions.sortBy[0]
+      } else {
+        this.dataTableRequest.sortBy = ''
+      }
+      if (
+        this.dataTableOptions.sortDesc &&
+        this.dataTableOptions.sortDesc.length > 0
+      ) {
+        this.dataTableRequest.sortDesc = this.dataTableOptions.sortDesc[0]
+      } else {
+        this.dataTableRequest.sortDesc = false
+      }
+      this.dataTableRequest.data.data = {
+        auditId: this.selectedAuditPlan.id
+      }
+      AuditPlanService.listCorrectionByAudit(this.dataTableRequest)
+        .then(response => {
+          this.tableResponse = response.data
+          this.loadingCorrectionTab = false
+          this.correctionChartData.datasets[0].data = this.chartData
+          this.idx++
+        })
+        .catch(error => {
+          if (error.response.status === 403) {
+          }
+          this.loadingCorrectionTab = false
+        })
+    },
     loadEmployee() {
       this.loadingEmployee = true
       EmployeeService.listAll()
@@ -829,8 +1324,24 @@ export default {
           this.loadingCorrection = false
         })
         .catch(error => {
-          this.selectedCorrection = Object.assign({}, this.emptyCorrection)
+          this.selectedCorrection = _.cloneDeep(this.emptyCorrection)
           this.selectedCorrection.auditItemId = auditItem.id
+          this.loadingCorrection = false
+        })
+    },
+    editCorrectionById(auditItemId) {
+      this.loadingCorrection = true
+      this.correctionDlg = true
+      this.createCorrectionStep()
+      AuditPlanService.getCorrectiveActionById(auditItemId)
+        .then(res => {
+          this.selectedCorrection = Object.assign({}, res.data)
+          this.createCorrectionStep()
+          this.loadingCorrection = false
+        })
+        .catch(error => {
+          this.selectedCorrection = _.cloneDeep(this.emptyCorrection)
+          this.selectedCorrection.auditItemId = auditItemId
           this.loadingCorrection = false
         })
     },
@@ -949,10 +1460,54 @@ export default {
           this.transactionDlg = true
         })
         .catch(error => {})
+    },
+    createNewExtraData(typ) {
+      this.selectedExtraData = Object.assign({}, this.emptyExtraData)
+      this.selectedExtraData.type = typ
+      this.extraDataDlg = true
+    },
+    saveExtra() {
+      this.selectedAuditPlan.extraList.push(this.selectedExtraData)
+      this.extraDataDlg = false
+    },
+    deleteExtra(item) {
+      this.selectedAuditPlan.extraList.splice(
+        this.selectedAuditPlan.extraList.indexOf(item),
+        1
+      )
+    },
+    saveAuditPlan() {
+      this.extraSaving = true
+      AuditPlanService.save(this.selectedAuditPlan)
+        .then(res => {
+          this.selectedAuditPlan = res.data
+          this.$toast.success('تم الحفظ بنجاح')
+          this.extraSaving = false
+        })
+        .catch(err => {
+          this.extraSaving = false
+          if (err.response.data.id) {
+            this.$toast.error(
+              'هناك خطأ في عملية الحفظ ' + 'رقم الخطأ ' + err.response.data.id
+            )
+          } else {
+            this.$toast.error('هناك خطأ في عملية الحفظ ')
+          }
+        })
     }
   },
   data() {
     return {
+      extraSaving: false,
+      extraDataDlg: false,
+      selectedExtraData: {},
+      emptyExtraData: { id: -1, description: '', type: 0 },
+      idx: 1,
+      loadingCorrectionTab: false,
+      tableResponse: new DataTableResponse(0, 0, 10),
+      dataTableRequest: new DataTableRequest(0, 10),
+      dataTableOptions: { page: 1, itemsPerPage: 10 },
+      tab: '',
       executeDateMenu: false,
       loadingEmployee: false,
       employees: [],
@@ -1095,10 +1650,162 @@ export default {
           filterable: true,
           width: '40%'
         }
-      ]
+      ],
+      correctionHeader: [
+        {
+          text: 'مسلسل',
+          value: 'sn',
+          align: 'center',
+          sortable: false,
+          width: '5%'
+        },
+        {
+          text: 'وصف الحالة',
+          value: 'description',
+          align: 'center',
+          sortable: true,
+          filterable: true,
+          width: '30%'
+        },
+        {
+          text: 'الموظف',
+          value: 'descEmployee',
+          align: 'center',
+          sortable: true,
+          filterable: true,
+          width: '20%'
+        },
+        {
+          text: 'التاريخ',
+          value: 'descDate',
+          align: 'center',
+          sortable: true,
+          filterable: true,
+          width: '10%'
+        },
+        {
+          text: 'الاغلاق',
+          value: 'status',
+          align: 'center',
+          sortable: true,
+          filterable: true,
+          width: '10%'
+        },
+        {
+          text: 'الاعتماد',
+          value: 'approved',
+          align: 'center',
+          sortable: true,
+          filterable: true,
+          width: '10%'
+        },
+        {
+          text: '#',
+          value: 'action',
+          align: 'center',
+          sortable: true,
+          filterable: true,
+          width: '15%'
+        }
+      ],
+      correctionStatus: ['جديد', 'تم التنفيذ', 'لم يتم التفيذ'],
+      approvedStatus: ['جديد', 'تم الاعتماد', 'تم الرفض'],
+      correctionChartData: {
+        labels: ['تم التنفيذ', 'لم يتم التنفيذ'],
+        datasets: [
+          {
+            borderWidth: 1,
+            borderColor: [colors.grey.darken2, colors.grey.darken2],
+            backgroundColor: [
+              this.$vuetify.theme.currentTheme.primary,
+              colors.grey.base
+            ],
+            data: this.chartData
+          }
+        ]
+      },
+      correctionChartOptions: {
+        title: {
+          display: true,
+          text: 'مؤشر الإغلاق'
+        },
+        plugins: {
+          datalabels: {
+            color: 'white',
+            offset: 30,
+            anchor: 'center',
+            labels: {
+              title: {
+                font: {
+                  weight: 'bold'
+                }
+              },
+              value: {
+                color: 'green'
+              }
+            }
+          }
+        },
+        cutoutPercentage: 70,
+        legend: {
+          position: 'chartArea',
+          display: true
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
     }
   },
   computed: {
+    extraList1() {
+      if (this.selectedAuditPlan.extraList) {
+        return this.selectedAuditPlan.extraList.filter(item => item.type === 1)
+      }
+      return null
+    },
+    extraList2() {
+      if (this.selectedAuditPlan.extraList) {
+        return this.selectedAuditPlan.extraList.filter(item => item.type === 2)
+      }
+      return null
+    },
+    extraList3() {
+      if (this.selectedAuditPlan.extraList) {
+        return this.selectedAuditPlan.extraList.filter(item => item.type === 3)
+      }
+      return null
+    },
+    extraList4() {
+      if (this.selectedAuditPlan.extraList) {
+        return this.selectedAuditPlan.extraList.filter(item => item.type === 4)
+      }
+      return null
+    },
+    extraList5() {
+      if (this.selectedAuditPlan.extraList) {
+        return this.selectedAuditPlan.extraList.filter(item => item.type === 5)
+      }
+      return null
+    },
+    extraList6() {
+      if (this.selectedAuditPlan.extraList) {
+        return this.selectedAuditPlan.extraList.filter(item => item.type === 6)
+      }
+      return null
+    },
+
+    chartData: function() {
+      if (this.tableResponse.data && this.tableResponse.data.length > 0) {
+        let cc = this.tableResponse.data.filter(item => {
+          return item.status === 2
+        }).length
+        let ret = []
+        ret.push(cc)
+        ret.push(this.tableResponse.total)
+        return ret
+      }
+      return [0, 0]
+    },
     hasApproval: function() {
       let ha = false
       try {

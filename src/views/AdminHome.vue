@@ -80,9 +80,9 @@
       <v-btn icon>
         <v-icon>mdi-bell</v-icon>
       </v-btn>
-      <v-btn>
+      <span class="me-2">
         {{ employee.name }}
-      </v-btn>
+      </span>
 
       <v-menu bottom offset-y transition="scale-transition">
         <template v-slot:activator="{ on }">
@@ -128,10 +128,10 @@
               <v-row class="text-center">
                 <v-col cols="12">
                   <v-img
-                    :src="require('../assets/logo.svg')"
+                    :src="require('../assets/logo2.png')"
                     class="my-3"
                     contain
-                    height="200"
+                    height="400px"
                   />
                 </v-col>
 
@@ -146,12 +146,21 @@
         </v-row>
       </v-container>
     </v-main>
-    <v-btn bottom color="pink" dark fab fixed left @click="dialog = !dialog">
+    <v-btn
+      bottom
+      color="pink"
+      v-if="false"
+      dark
+      fab
+      fixed
+      left
+      @click="dialog = !dialog"
+    >
       <v-icon>mdi-plus</v-icon>
     </v-btn>
     <v-dialog v-model="passDlg" width="400px">
       <v-card>
-        <v-card-title class="accent">
+        <v-card-title>
           تعديل كلمة المرور
         </v-card-title>
         <v-container>
@@ -193,10 +202,8 @@
           </v-row>
         </v-container>
         <v-card-actions>
-          <v-btn text color="primary">More</v-btn>
-          <v-spacer />
-          <v-btn text color="default" @click="passDlg = false">إغلاق</v-btn>
           <v-btn text color="primary" @click="changePassword()">تعديل</v-btn>
+          <v-btn text color="error" @click="passDlg = false">إغلاق</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -211,7 +218,9 @@ export default {
   computed: {
     ...mapState('auth', ['employee'])
   },
-
+  created() {
+    document.title = this.$route.meta.title
+  },
   data: () => ({
     currentPass: '',
     newPass: '',
@@ -249,6 +258,11 @@ export default {
       },
       {
         icon: 'mdi-book-check',
+        text: 'تقارير التدقيق',
+        to: { name: 'AuditReportSearch' }
+      },
+      {
+        icon: 'mdi-calendar-multiple-check',
         text: 'خطة التدقيق',
         to: '/admin/auditPlan'
       },

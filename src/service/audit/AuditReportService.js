@@ -5,7 +5,7 @@ import authHeader from '@/util/auth-header'
 export default {
   list: async requestData => {
     return await axios.post(
-      Paths.BASE_URL + Paths.AUDIT_PLAN_PATH + '/list',
+      Paths.BASE_URL + Paths.AUDIT_REPORT_PATH + '/list',
       requestData,
       {
         headers: authHeader()
@@ -14,17 +14,29 @@ export default {
   },
   search: async requestData => {
     return await axios.post(
-      Paths.BASE_URL + Paths.AUDIT_PLAN_PATH + '/search',
+      Paths.BASE_URL + Paths.AUDIT_REPORT_PATH + '/search',
       requestData,
       {
         headers: authHeader()
       }
     )
   },
-  save: async audit_plan => {
+  save: async audit_report => {
     return await axios.post(
-      Paths.BASE_URL + Paths.AUDIT_PLAN_PATH + '/saveData/' + audit_plan.encId,
-      audit_plan,
+      Paths.BASE_URL + Paths.AUDIT_REPORT_PATH + '/save/' + audit_report.encId,
+      audit_report,
+      {
+        headers: authHeader()
+      }
+    )
+  },
+  listEmployees: async audit_report => {
+    return await axios.post(
+      Paths.BASE_URL +
+        Paths.AUDIT_REPORT_PATH +
+        '/listEmployees/' +
+        audit_report.encId,
+      {},
       {
         headers: authHeader()
       }
@@ -33,7 +45,7 @@ export default {
   saveItem: async check_list_item => {
     return await axios.post(
       Paths.BASE_URL +
-        Paths.AUDIT_PLAN_PATH +
+        Paths.AUDIT_REPORT_PATH +
         '/saveItem/' +
         check_list_item.encId,
       check_list_item,
@@ -45,7 +57,7 @@ export default {
   saveCorrectiveAction: async correctiveAction => {
     return await axios.post(
       Paths.BASE_URL +
-        Paths.AUDIT_PLAN_PATH +
+        Paths.AUDIT_REPORT_PATH +
         '/saveCorrectiveAction/' +
         correctiveAction.encId,
       correctiveAction,
@@ -57,7 +69,7 @@ export default {
   updateCorrectionApproved: async correctiveAction => {
     return await axios.post(
       Paths.BASE_URL +
-        Paths.AUDIT_PLAN_PATH +
+        Paths.AUDIT_REPORT_PATH +
         '/updateCorrectionApproved/' +
         correctiveAction.encId +
         '/1',
@@ -70,7 +82,7 @@ export default {
   updateCorrectionFollow: async correctiveAction => {
     return await axios.post(
       Paths.BASE_URL +
-        Paths.AUDIT_PLAN_PATH +
+        Paths.AUDIT_REPORT_PATH +
         '/updateCorrectionFollow/' +
         correctiveAction.encId +
         '/' +
@@ -84,7 +96,7 @@ export default {
   updateResultItem: async check_list_item => {
     return await axios.post(
       Paths.BASE_URL +
-        Paths.AUDIT_PLAN_PATH +
+        Paths.AUDIT_REPORT_PATH +
         '/updateResultItem/' +
         check_list_item.encId,
       check_list_item,
@@ -96,7 +108,7 @@ export default {
   getCorrectiveAction: async check_list_item => {
     return await axios.post(
       Paths.BASE_URL +
-        Paths.AUDIT_PLAN_PATH +
+        Paths.AUDIT_REPORT_PATH +
         '/getCorrectiveAction/' +
         check_list_item.id,
       {},
@@ -105,22 +117,9 @@ export default {
       }
     )
   },
-  getCorrectiveActionById: async p_id => {
-    return await axios.post(
-      Paths.BASE_URL + Paths.AUDIT_PLAN_PATH + '/getCorrectiveAction/' + p_id,
-      {},
-      {
-        headers: authHeader()
-      }
-    )
-  },
-  deleteCorrectiveAction: async enc_id => {
-    return await axios.post(
-      Paths.BASE_URL +
-        Paths.AUDIT_PLAN_PATH +
-        '/deleteCorrectiveAction/' +
-        enc_id,
-      {},
+  delete: async auditReport => {
+    return await axios.delete(
+      Paths.BASE_URL + Paths.AUDIT_REPORT_PATH + '/' + auditReport.id,
       {
         headers: authHeader()
       }
@@ -129,7 +128,7 @@ export default {
   deleteItem: async check_list_item => {
     return await axios.post(
       Paths.BASE_URL +
-        Paths.AUDIT_PLAN_PATH +
+        Paths.AUDIT_REPORT_PATH +
         '/deleteItem/' +
         check_list_item.encId,
       check_list_item,
@@ -140,13 +139,13 @@ export default {
   },
   getOne: async encId => {
     return await axios.get(
-      Paths.BASE_URL + Paths.AUDIT_PLAN_PATH + '/' + encId,
+      Paths.BASE_URL + Paths.AUDIT_REPORT_PATH + '/' + encId,
       { headers: authHeader() }
     )
   },
   listCheckListItem: async encId => {
     return await axios.post(
-      Paths.BASE_URL + Paths.AUDIT_PLAN_PATH + '/listCheckListItem/' + encId,
+      Paths.BASE_URL + Paths.AUDIT_REPORT_PATH + '/listCheckListItem/' + encId,
       {},
       { headers: authHeader() }
     )
@@ -155,7 +154,7 @@ export default {
   getByDepartmentEdit: async (departmentIdEnc, type) => {
     return await axios.post(
       Paths.BASE_URL +
-        Paths.AUDIT_PLAN_PATH +
+        Paths.AUDIT_REPORT_PATH +
         '/getByDepartment' +
         '/' +
         departmentIdEnc +
@@ -168,7 +167,7 @@ export default {
   updateStatus: async (planId, status, remarksTxt) => {
     return await axios.post(
       Paths.BASE_URL +
-        Paths.AUDIT_PLAN_PATH +
+        Paths.AUDIT_REPORT_PATH +
         '/updateStatus/' +
         planId +
         '/' +
@@ -180,24 +179,10 @@ export default {
   listTransactionByAuditPlan: async planId => {
     return await axios.post(
       Paths.BASE_URL +
-        Paths.AUDIT_PLAN_PATH +
+        Paths.AUDIT_REPORT_PATH +
         '/listTransactionByAuditPlan/' +
         planId,
       {},
-      { headers: authHeader() }
-    )
-  },
-  listCorrectionByAudit: async requestData => {
-    return await axios.post(
-      Paths.BASE_URL + Paths.AUDIT_PLAN_PATH + '/listCorrectionByAudit',
-      requestData,
-      { headers: authHeader() }
-    )
-  },
-  listCorrectionByReport: async requestData => {
-    return await axios.post(
-      Paths.BASE_URL + Paths.AUDIT_PLAN_PATH + '/listCorrectionByReport',
-      requestData,
       { headers: authHeader() }
     )
   }

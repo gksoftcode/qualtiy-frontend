@@ -228,7 +228,9 @@ export default {
 
   watch: {},
 
-  created() {},
+  created() {
+    document.title = this.$route.meta.title
+  },
 
   methods: {
     save() {

@@ -1,5 +1,5 @@
 <template>
-  <v-card elevation="2">
+  <v-card elevation="2" class="custom-heading">
     <v-card-title>
       <v-toolbar dense>
         <v-app-bar-nav-icon></v-app-bar-nav-icon>
@@ -92,7 +92,7 @@ import { mapState } from 'vuex'
 export default {
   created() {
     this.dataTableRequest.data.textSearch = ''
-    console.log(this.employee)
+    document.title = this.$route.meta.title
   },
   mounted() {
     this.loadRoles()

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-card elevation="2">
+    <v-card elevation="2" class="custom-heading">
       <v-card-title>
         <v-toolbar-items>
           <v-icon>
@@ -129,14 +129,7 @@
         </v-data-table>
       </v-card-text>
       <v-card-text>
-        <v-alert
-          border="bottom"
-          icon="mdi-key-outline mdi-flip-h"
-          type="error"
-          :value="!hasAccess"
-        >
-          لاتملك الأحقية الكافية لاستخدام هذه الخدمة
-        </v-alert>
+        <error401 v-if="!hasAccess"></error401>
       </v-card-text>
       <v-card-actions> </v-card-actions>
     </v-card>
@@ -178,11 +171,13 @@ import DataTableResponse from '@/model/response/DataTableResponse'
 import { mapState } from 'vuex'
 import EmployeeService from '@/service/employee/EmployeeService'
 import BugService from '@/service/bug/BugService'
+import Error401 from '@/components/Error401'
 export default {
   created() {
     this.dataTableRequest.data.textSearch = ''
+    document.title = this.$route.meta.title
   },
-  components: { JsonViewer },
+  components: { Error401, JsonViewer },
   mounted() {
     this.loadEmployee()
     this.headers = Object.values(this.mainHeader)

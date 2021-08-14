@@ -19,6 +19,8 @@ import FilesManager from '@/views/admin/workGuide/FilesManager'
 import AuditPlan from '@/views/admin/audit/AuditPlan'
 import CheckListEditor from '@/views/admin/audit/CheckListEditor'
 import Bug from '@/views/admin/bug/Bug'
+import AuditReport from '@/views/admin/audit/AuditReport/AuditReport'
+import AuditReportSearch from '@/views/admin/audit/AuditReportSearch'
 
 Vue.use(VueRouter)
 
@@ -31,7 +33,10 @@ const routes = [
       {
         path: '/admin/',
         name: 'AdminLanding',
-        component: AdminLanding
+        component: AdminLanding,
+        meta: {
+          title: 'إدارة النظام'
+        }
       },
       {
         path: '/admin/option',
@@ -41,73 +46,130 @@ const routes = [
       {
         path: '/admin/workGuideAdmin',
         name: 'WorkGuideAdmin',
-        component: WorkGuideAdmin
+        component: WorkGuideAdmin,
+        meta: {
+          title: 'إدارة الاجراءات الادارية'
+        }
       },
       {
         path: '/admin/filesManager',
         name: 'FilesManager',
-        component: FilesManager
+        component: FilesManager,
+        meta: {
+          title: 'إدارة السجلات'
+        }
       },
       {
         path: '/admin/workGuideAdmin/edit/:departmentEncId/:editType',
         name: 'WorkGuideAdminEdit',
         props: true,
-        component: WorkGuideEditor
+        component: WorkGuideEditor,
+        meta: {
+          title: 'إدارة الاجراءات الادارية'
+        }
       },
       {
         path: '/admin/workGuideAdmin/view/:encId/:viewType',
         name: 'WorkGuideAdminView',
         props: true,
-        component: WorkGuideAdminView
+        component: WorkGuideAdminView,
+        meta: {
+          title: 'إدارة الاجراءات الادارية'
+        }
       },
       {
         path: '/admin/job',
         name: 'Job',
-        component: Job
+        component: Job,
+        meta: {
+          title: 'إدارة الوظائف'
+        }
       },
       {
         path: '/admin/department',
         name: 'Department',
-        component: Department
+        component: Department,
+        meta: {
+          title: 'الهيكل التنظيمي'
+        }
       },
       {
         path: '/admin/permission',
         name: 'Permission',
-        component: Permission
+        component: Permission,
+        meta: {
+          title: 'إدارة الاحقيات'
+        }
       },
       {
         path: '/admin/employee',
         name: 'Employee',
-        component: Employee
+        component: Employee,
+        meta: {
+          title: 'إدارة الموظفين'
+        }
       },
       {
         path: '/admin/auditPlan',
         name: 'AuditPlan',
-        component: AuditPlan
+        component: AuditPlan,
+        meta: {
+          title: 'خطة التدقيق'
+        }
       },
       {
         path: '/admin/checkList/:auditPlanEncId',
         name: 'CheckListEditor',
         props: true,
-        component: CheckListEditor
+        component: CheckListEditor,
+        meta: {
+          title: 'تدقيق الوحدة'
+        }
       },
       {
         path: '/admin/workGuideEditor/:objectId',
         name: 'WorkGuideEditor',
         props: true,
-        component: WorkGuideEditor
+        component: WorkGuideEditor,
+        meta: {
+          title: 'تحرير دليل اجرآات'
+        }
       },
       {
         path: '/admin/WorkGuideEditorDept/:departmentEncId/:editType',
         name: 'WorkGuideEditorDept',
         props: true,
-        component: WorkGuideEditor
+        component: WorkGuideEditor,
+        meta: {
+          title: 'تحرير دليل الاجراءات'
+        }
+      },
+      {
+        path: '/admin/auditReport/edit/:encId',
+        name: 'AuditReportEdit',
+        props: true,
+        component: AuditReport,
+        meta: {
+          title: 'تحرير تقرير تدقيق'
+        }
+      },
+      {
+        path: '/admin/auditReport',
+        name: 'AuditReportSearch',
+        props: true,
+        component: AuditReportSearch,
+        meta: {
+          title: 'تقارير التدقيق'
+        }
       },
       {
         path: '/admin/Bug',
         name: 'Bugs',
         props: true,
-        component: Bug
+        component: Bug,
+        meta: {
+          title: 'صفحة الأخطاء'
+        }
       }
     ]
   },
@@ -119,20 +181,29 @@ const routes = [
         path: '/',
         name: 'Landing',
         props: true,
-        component: Landing
+        component: Landing,
+        meta: {
+          title: 'نظام الاجراءات الادارية'
+        }
       },
       {
         path: '/view/:departmentId',
         name: 'View',
         props: true,
-        component: WorkGuide
+        component: WorkGuide,
+        meta: {
+          title: 'نظام الاجراءات الادارية'
+        }
       }
     ]
   },
   {
     path: '/login',
     name: 'Login',
-    component: Login
+    component: Login,
+    meta: {
+      title: 'صفحة الدخول'
+    }
   },
   {
     path: '/about',

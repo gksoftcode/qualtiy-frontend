@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-card elevation="2">
+    <v-card elevation="2" class="custom-heading">
       <v-card-title>
         <v-toolbar-items>
           <v-icon>
@@ -290,14 +290,7 @@
         </v-data-table>
       </v-card-text>
       <v-card-text>
-        <v-alert
-          border="bottom"
-          icon="mdi-key-outline mdi-flip-h"
-          type="error"
-          :value="!hasAccess"
-        >
-          لاتملك الأحقية الكافية لاستخدام هذه الخدمة
-        </v-alert>
+        <error401 v-if="!hasAccess"></error401>
       </v-card-text>
       <v-card-actions> </v-card-actions>
     </v-card>
@@ -316,10 +309,12 @@ import { mapState } from 'vuex'
 import DepartmentService from '@/service/department/DepartmentService'
 import WorkGuideService from '@/service/workGuide/WorkGuideService'
 import WorkGuideTransactionDialog from '@/components/transaction/WorkGuideTransactionDialog'
+import Error401 from '@/components/Error401'
 export default {
-  components: { WorkGuideTransactionDialog },
+  components: { Error401, WorkGuideTransactionDialog },
   created() {
     this.dataTableRequest.data.textSearch = ''
+    document.title = this.$route.meta.title
   },
   computed: {
     hasFullDepartment: function() {
@@ -595,7 +590,7 @@ export default {
           value: 'action',
           align: 'center',
           sortable: false,
-          width: '10%'
+          width: '15%'
         }
       ]
     }

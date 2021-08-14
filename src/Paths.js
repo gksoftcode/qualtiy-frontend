@@ -14,5 +14,6 @@ export const Paths = {
   FILE_UPLOAD_PATH: 'api/common/fileUploader',
   AUDIT_PLAN_PATH: 'api/audit_plan',
   PERMISSION_PATH: 'api/permission',
-  BUG_PATH: 'api/exception_log'
+  BUG_PATH: 'api/exception_log',
+  AUDIT_REPORT_PATH: 'api/auditReport'
 }

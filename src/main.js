@@ -10,6 +10,11 @@ import _ from 'lodash'
 import './plugins/vee-validate'
 import 'vue-toastification/dist/index.css'
 import Constants from '@/plugins/Constants'
+import { VTooltip, VPopover, VClosePopover } from 'v-tooltip'
+
+Vue.directive('tooltip', VTooltip)
+Vue.directive('close-popover', VClosePopover)
+Vue.component('v-popover', VPopover)
 
 Vue.filter('formatDate', function(value) {
   if (value) {
@@ -70,7 +75,6 @@ Vue.use(VuetifyConfirm, {
 Vue.use(Toast, options)
 Vue.config.productionTip = false
 Vue.use(Constants)
-
 new Vue({
   router,
   store,

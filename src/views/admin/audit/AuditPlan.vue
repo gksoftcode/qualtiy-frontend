@@ -1,41 +1,122 @@
 <template>
   <div>
-    <v-card elevation="2">
+    <v-card elevation="2" class="custom-heading">
       <v-card-title>
         <v-toolbar-items>
           <v-icon>
-            mdi-book-check mdi-24px
+            mdi-calendar-multiple-check mdi-24px
           </v-icon>
           <v-toolbar-title>إدارة خطة التدقيق</v-toolbar-title>
         </v-toolbar-items>
       </v-card-title>
       <v-card-subtitle class="mt-0" v-if="hasAccess">
-        <v-toolbar dense>
-          <v-app-bar-nav-icon></v-app-bar-nav-icon>
-          <v-spacer></v-spacer>
-          <v-select
-            :items="years"
-            item-value="id"
-            item-text="name"
-            v-model="yearId"
-            @change="loadData"
-            dense
-            label="السنة"
-            clearable
-          ></v-select>
-          <v-btn icon>
-            <v-icon @click="loadData">mdi-magnify</v-icon>
-          </v-btn>
-          <v-spacer></v-spacer>
-          <v-btn icon v-if="canEdit" @click="creatNew()">
-            <v-icon>
-              mdi-plus
-            </v-icon>
-          </v-btn>
-          <v-btn icon>
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </v-toolbar>
+        <v-row dense>
+          <v-col cols="4">
+            <ValidationProvider
+              name="الادارة / القسم / الشعبة"
+              v-slot="{ errors }"
+              rules="required"
+              v-if="fullAccess"
+            >
+              <v-menu
+                v-model="depMenu"
+                :close-on-content-click="false"
+                nudge-top="100px"
+                nudge-width="50"
+                transition="scale-transition"
+                offset-y
+                min-width="290px"
+                max-height="450px"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    label="الوحدة الإدارية"
+                    dense
+                    clearable
+                    :error-messages="errors"
+                    outlined
+                    v-bind="attrs"
+                    prepend-inner-icon="mdi-cube-outline"
+                    v-on="on"
+                    :value="department.name"
+                    @click:clear="clearDepartment"
+                  >
+                  </v-text-field>
+                </template>
+                <v-card>
+                  <v-card-title>الهيكل التنظيمي</v-card-title>
+                  <v-card-text>
+                    <v-row dense>
+                      <v-col cols="12" class="treePanel">
+                        <v-treeview
+                          open-all
+                          :active.sync="selectedDepartment"
+                          dense
+                          return-object
+                          :items="root"
+                          item-children="departmentList"
+                          item-key="id"
+                          activatable
+                          hoverable
+                        >
+                          <template v-slot:prepend="{ item }">
+                            <v-icon v-if="item.departmentList.length > 0">
+                              mdi-view-grid
+                            </v-icon>
+
+                            <v-icon v-if="item.departmentList.length == 0">
+                              mdi-cube-outline
+                            </v-icon>
+                          </template>
+                        </v-treeview>
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-btn
+                      text
+                      color="primary"
+                      @click="updateSelectedDepartment"
+                    >
+                      إختيار
+                    </v-btn>
+                    <v-btn text color="red" @click="depMenu = false">
+                      إلغاء
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-menu>
+            </ValidationProvider>
+            <v-text-field
+              dense
+              v-else
+              readonly
+              label="الادارة / القسم / الشعبة"
+              :value="employee.departmentName"
+              outlined
+            ></v-text-field>
+          </v-col>
+          <v-col cols="3">
+            <v-select
+              outlined
+              :items="years"
+              item-value="id"
+              item-text="name"
+              v-model="yearId"
+              @change="loadData"
+              dense
+              label="السنة"
+              clearable
+            ></v-select>
+          </v-col>
+          <v-col cols="1">
+            <v-btn icon>
+              <v-icon color="primary" @click="loadData"
+                >mdi-magnify mdi-36px</v-icon
+              >
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-card-subtitle>
       <v-card-text v-if="hasAccess">
         <v-data-table
@@ -76,16 +157,18 @@
           </template>
           <template v-slot:item.action="{ item }">
             <v-btn
+              v-tooltip="'تحرير'"
               color="primary"
               icon
               @click="edit(item)"
-              v-if="canEdit && item.status < 10"
+              v-if="fullAccess && item.status < 10"
             >
               <v-icon>
                 mdi-square-edit-outline
               </v-icon>
             </v-btn>
             <v-btn
+              v-tooltip="'قائمة الأسئلة'"
               color="primary"
               icon
               :to="{
@@ -101,14 +184,7 @@
         </v-data-table>
       </v-card-text>
       <v-card-text>
-        <v-alert
-          border="bottom"
-          icon="mdi-key-outline mdi-flip-h"
-          type="error"
-          :value="!hasAccess"
-        >
-          لاتملك الأحقية الكافية لاستخدام هذه الخدمة
-        </v-alert>
+        <error401 v-if="!hasAccess"></error401>
       </v-card-text>
       <v-card-actions> </v-card-actions>
     </v-card>
@@ -257,6 +333,7 @@
 </template>
 
 <script>
+import Error401 from '@/components/Error401'
 import _ from 'lodash'
 import moment from 'moment'
 import AuditPlanService from '@/service/audit/AuditPlanService'
@@ -266,6 +343,7 @@ import DataTableResponse from '@/model/response/DataTableResponse'
 import { mapState } from 'vuex'
 import EmployeeService from '@/service/employee/EmployeeService'
 export default {
+  components: { Error401 },
   created() {
     this.dataTableRequest.data.textSearch = ''
     this.status[0] = 'جديد'
@@ -273,13 +351,14 @@ export default {
     this.status[10] = 'معتمد'
     this.status[11] = 'ارجاع نتائج'
     this.status[20] = 'معتمد نهائي'
-    for (var y = moment().year(); y > 2015; y--) {
+    for (let y = 2021; y < moment().year() + 2; y++) {
       this.years.push({ id: y, name: y })
     }
+    document.title = this.$route.meta.title
   },
 
   computed: {
-    canEdit: function() {
+    fullAccess: function() {
       let ha = false
       try {
         this.employee.roles.forEach(item => {
@@ -298,28 +377,38 @@ export default {
     },
     hasAccess: function() {
       return true
-      // let ha = false
-      // try {
-      //   this.employee.roles.forEach(item => {
-      //     if (item === 'ROLE_HR' || item === 'ROLE_ADMIN') {
-      //       ha = true
-      //     }
-      //   })
-      // } catch (e) {
-      //   return false
-      // }
-      // return ha
     },
     ...mapState('auth', ['employee'])
   },
   mounted() {
-    DepartmentService.listDepartments()
-      .then(response => {
-        this.departments = response.data
-      })
-      .then(error => {})
+    // DepartmentService.listDepartments()
+    //   .then(response => {
+    //     this.departments = response.data
+    //   })
+    //   .then(error => {})
+    this.loadDepartmentTree()
   },
   methods: {
+    loadDepartmentTree() {
+      this.loadTree = true
+      DepartmentService.loadTree()
+        .then(response => {
+          this.root = response.data
+          this.loadTree = false
+        })
+        .catch(error => {
+          this.loadTree = false
+        })
+    },
+    updateSelectedDepartment() {
+      this.department = Object.assign({}, this.selectedDepartment[0])
+      this.departmentId = this.selectedDepartment[0].id
+      this.depMenu = false
+    },
+    clearDepartment() {
+      this.department = { id: -1, name: '', encId: '-1' }
+      this.departmentId = -1
+    },
     addEmployee() {
       if (this.selectedAuditPlan.auditors.indexOf(this.selectedEmployee) < 0) {
         this.selectedAuditPlan.auditors.push(this.selectedEmployee)
@@ -358,7 +447,8 @@ export default {
         this.dataTableRequest.sortDesc = false
       }
       this.dataTableRequest.data.data = {
-        yearId: this.yearId
+        yearId: this.yearId,
+        depId: this.fullAccess ? this.departmentId : this.employee.departmentId
       }
       AuditPlanService.search(this.dataTableRequest)
         .then(response => {
@@ -428,6 +518,11 @@ export default {
   },
   data() {
     return {
+      depMenu: false,
+      selectedDepartment: [],
+      departmentId: -1,
+      department: { id: -1, name: '', encId: '-1' },
+      root: [],
       years: [],
       yearId: moment().year(),
       status: new Map(),
@@ -487,7 +582,7 @@ export default {
           value: 'sn',
           align: 'center',
           sortable: false,
-          width: '10%'
+          width: '5%'
         },
         {
           text: 'الوحدة الادارة',
@@ -495,7 +590,7 @@ export default {
           align: 'center',
           sortable: true,
           filterable: true,
-          width: '55%'
+          width: '40%'
         },
         {
           text: 'تاريخ البدء',
@@ -526,7 +621,7 @@ export default {
           value: 'action',
           align: 'center',
           sortable: false,
-          width: '10%'
+          width: '15%'
         }
       ]
     }
