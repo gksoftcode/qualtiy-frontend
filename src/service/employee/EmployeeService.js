@@ -90,7 +90,10 @@ export default {
       )
     } else {
       return await axios.post(
-        Paths.BASE_URL + Paths.EMPLOYEE_PATH + '/save/' + employee.encId,
+        Paths.BASE_URL +
+          Paths.EMPLOYEE_PATH +
+          '/saveAndUpdate/' +
+          employee.encId,
         employee,
         {
           headers: authHeader()

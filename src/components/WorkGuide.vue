@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card class="mt-1 ms-1 me-1">
     <v-card-text v-show="!noData">
       <v-row v-show="loading" dense>
         <v-col cols="4">
@@ -30,8 +30,8 @@
         <v-col cols="3">
           <v-text-field
             readonly
-            v-model="selected.documentNo"
-            label="رقم الوثيقة"
+            :value="documentNumber"
+            label="رقم الدليل"
             dense
             outlined
           ></v-text-field>
@@ -40,7 +40,7 @@
           <v-text-field
             readonly
             outlined
-            v-model="selected.issueDate"
+            :value="selected.issueDate"
             label="تاريخ الاصدار"
             prepend-inner-icon="mdi-calendar"
             dense
@@ -50,20 +50,20 @@
           <v-text-field
             readonly
             type="number"
-            v-model="selected.version"
+            :value="selected.version"
             label="النسخة"
             dense
             outlined
           ></v-text-field>
         </v-col>
-         <v-col cols="1">
-        <v-btn  color="info" @click="generatePdf">
-          <v-icon>
-            mdi-file-pdf
-          </v-icon>
-          pdf
-        </v-btn>
-         </v-col>
+        <v-col cols="1" v-if="false">
+          <v-btn color="info" @click="generatePdf">
+            <v-icon>
+              mdi-file-pdf
+            </v-icon>
+            pdf
+          </v-btn>
+        </v-col>
       </v-row>
       <v-row dense>
         <v-col cols="12" v-show="loading">
@@ -86,7 +86,7 @@
         <v-col cols="12" v-show="!loading">
           <fieldset class="wc-fieldset">
             <legend class="wc-legend">
-              2 - النظاق
+              2 - النطاق
             </legend>
             <v-row dense>
               <span class="definitionTitle">2.1 -</span>
@@ -140,6 +140,7 @@
                 <v-col cols="12">
                   <span v-text="dfn.description"></span>
                 </v-col>
+                <v-divider inset></v-divider>
               </v-row>
             </template>
           </fieldset>
@@ -166,6 +167,7 @@
                 <v-col cols="12">
                   <span v-text="resp.description" />
                 </v-col>
+                <v-divider inset></v-divider>
               </v-row>
             </template>
           </fieldset>
@@ -199,7 +201,22 @@
                     <v-col cols="12">
                       <v-data-table
                         dense
-                        :headers="procedureHeader"
+                        :headers="
+                          procedureHeader1
+                            .concat(
+                              proc.responsibilities.map((pro, idx) => {
+                                return {
+                                  text: pro.name,
+                                  value: 'val' + (idx + 1),
+                                  align: 'center',
+                                  sortable: false,
+                                  filterable: false,
+                                  width: '5%'
+                                }
+                              })
+                            )
+                            .concat(procedureHeader2)
+                        "
                         :items="proc.steps"
                         :disable-pagination="true"
                         :hide-default-footer="true"
@@ -212,6 +229,23 @@
                         </template>
                         <template v-slot:item.files="{ item }">
                           <v-row dense>
+                            <template v-for="(doc, idx) in item.documentTypes">
+                              <span :key="doc.id">
+                                {{ idx > 0 ? ' , ' : '' }}
+                                {{ doc.name }}
+                              </span>
+                            </template>
+                          </v-row>
+                          <v-row dense>
+                            <v-col
+                              cols="12"
+                              v-for="doc in item.docs"
+                              :key="doc"
+                            >
+                              <span>
+                                {{ doc }}
+                              </span>
+                            </v-col>
                             <v-col
                               cols="12"
                               v-for="file in item.files"
@@ -346,13 +380,9 @@
       </v-row>
     </v-card-text>
     <v-card-text v-show="noData">
-      <v-alert border="top" color="red lighten-1" dark>
-        لايوجد دليل إجراءات لهذه الادارة
-        <b>
-          {{ departmentName }}
-        </b>
-      </v-alert></v-card-text
-    >
+      <div class="thin-header"></div>
+      <empty message="لايوجد دليل معتمد  حاليا .."></empty>
+    </v-card-text>
   </v-card>
 </template>
 
@@ -364,6 +394,7 @@ import { Paths } from '@/Paths'
 import FileList from '@/components/FileList'
 import AttachmentService from '@/service/attachment/AttachmentService'
 import { mapActions } from 'vuex'
+import Empty from '@/components/Empty'
 export default {
   name: 'WorkGuide',
   props: {
@@ -386,13 +417,15 @@ export default {
   },
   watch: {
     departmentId(oldVal, newVal) {
+      if (newVal === '0') return
       this.loadWorkGuide()
     },
-    encId() {
+    encId(oldVal, newVal) {
+      if (newVal === '0') return
       this.loadWorkGuide()
     }
   },
-  components: { FileList },
+  components: { Empty, FileList },
   mounted() {
     if (this.encId !== '0' || this.departmentId !== '0') {
       this.loadWorkGuide()
@@ -439,6 +472,7 @@ export default {
       }
     },
     loadFileList() {
+      if (this.departmentId === '0') return
       AttachmentService.listApproved(this.departmentId)
         .then(response => {
           this.files = response.data
@@ -468,6 +502,16 @@ export default {
     }
   },
   computed: {
+    documentNumber: function() {
+      if (this.selected.department && this.selected.department.departmentNo) {
+        return (
+          'AHM-OP-' +
+          this.$options.filters.twoDigit(this.selected.department.departmentNo)
+        )
+      } else {
+        return ''
+      }
+    },
     attachmentPdfPath: function() {
       return Paths.BASE_URL + Paths.FILE_UPLOAD_PATH + '/getPdfAttachment/'
     },
@@ -521,12 +565,64 @@ export default {
         width: '20%'
       })
       return arr
+    },
+    procedureHeader1: function() {
+      let arr = []
+      arr.push({
+        text: 'مسلسل',
+        value: 'orderNo',
+        align: 'center',
+        sortable: false,
+        width: '5%'
+      })
+      arr.push({
+        text: 'وصف الخطوة',
+        value: 'description',
+        align: 'center',
+        sortable: false,
+        filterable: true,
+        width: '40%'
+      })
+      return arr
+    },
+    procedureHeader2: function() {
+      let arr = []
+      arr.push({
+        text: 'الملاحظات',
+        value: 'remarks',
+        align: 'center',
+        sortable: false,
+        filterable: true,
+        width: '15%'
+      })
+      arr.push({
+        text: 'الوثائق ذات العلاقة',
+        value: 'files',
+        align: 'center',
+        sortable: false,
+        filterable: false,
+        width: '20%'
+      })
+      arr.push({
+        text: '...',
+        value: 'action',
+        align: 'center',
+        sortable: false,
+        filterable: false,
+        width: '5%'
+      })
+
+      return arr
     }
   }
 }
 </script>
 
 <style scoped>
+.thin-header {
+  height: 10px;
+  background: var(--v-primary-base);
+}
 .wc-legend {
   color: #616161;
   font-size: 1.1em;

@@ -16,6 +16,9 @@ export default {
 }
 </script>
 <style lang="scss">
+.mdi-256px {
+  font-size: 256px !important;
+}
 .v-application {
   /*font-family: bukralight, sans-serif !important;*/
 }

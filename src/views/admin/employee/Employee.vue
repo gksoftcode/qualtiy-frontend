@@ -1,335 +1,344 @@
 <template>
-  <v-card elevation="2" class="custom-heading">
-    <v-card-title>
-      <v-toolbar-items>
-        <v-icon>mdi-account-group </v-icon>
-        <v-toolbar-title>إدارة الموظفين</v-toolbar-title>
-      </v-toolbar-items>
-    </v-card-title>
-    <v-card-subtitle v-if="hasAccess" class="mt-0">
-      <v-toolbar dense>
-        <v-app-bar-nav-icon></v-app-bar-nav-icon>
-
-        <v-spacer></v-spacer>
-        <v-text-field
-          v-model="dataTableRequest.data.textSearch"
-          @keypress.enter="loadData"
-          placeholder="بحث حسب الاسم أو الرقم"
-        ></v-text-field>
-        <v-btn icon>
-          <v-icon @click="loadData">mdi-magnify</v-icon>
-        </v-btn>
-        <v-spacer></v-spacer>
-        <v-btn icon @click="creatNew()">
-          <v-icon>
-            mdi-plus
-          </v-icon>
-        </v-btn>
-        <v-btn icon>
-          <v-icon>mdi-dots-vertical</v-icon>
-        </v-btn>
-      </v-toolbar>
-    </v-card-subtitle>
-    <v-card-text v-if="hasAccess">
-      <v-data-table
-        :headers="mainHeader"
-        :items="tableResponse.data"
-        :loading="loading"
-        item-key="id"
-        :options.sync="dataTableOptions"
-        :server-items-length="tableResponse.total"
-      >
-        <template v-slot:item.sn="{ item }">
-          {{
-            dataTableOptions.itemsPerPage * (dataTableOptions.page - 1) +
-              tableResponse.data.indexOf(item) +
-              1
-          }}
-        </template>
-        <template v-slot:item.email="{ item }">
-          <a :href="`mailto:${item.email}`">
-            {{ item.email }}
-          </a>
-        </template>
-
-        <template v-slot:item.action="{ item }">
-          <v-flex>
-            <v-btn color="primary" icon @click="edit(item)">
+  <div>
+    <v-card elevation="2" class="custom-heading">
+      <v-card-title>
+        <v-toolbar-items>
+          <v-icon>mdi-account-group </v-icon>
+          <v-toolbar-title>إدارة الموظفين</v-toolbar-title>
+        </v-toolbar-items>
+      </v-card-title>
+      <v-card-text v-if="hasAccess">
+        <v-row dense>
+          <v-col cols="6">
+            <v-text-field
+              dense
+              outlined
+              v-model="dataTableRequest.data.textSearch"
+              @keypress.enter="loadData"
+              placeholder="بحث حسب الاسم أو الرقم"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="1">
+            <v-btn icon color="primary">
+              <v-icon @click="loadData">mdi-magnify mdi-36px</v-icon>
+            </v-btn>
+          </v-col>
+          <v-col cols="5">
+            <v-btn color="primary" class="float-left" icon @click="creatNew()">
               <v-icon>
-                mdi-square-edit-outline
+                mdi-plus mdi-36px
               </v-icon>
             </v-btn>
-            <v-btn color="error" icon @click="resetPassword(item)">
-              <v-icon>mdi-lock-reset</v-icon>
-            </v-btn>
-          </v-flex>
-        </template>
-      </v-data-table>
-    </v-card-text>
-    <v-card-actions>
-      <v-dialog dir="rtl" v-model="showDialog" width="60%">
-        <v-card>
-          <v-card-title>
-            تحرير موظف
-          </v-card-title>
-          <v-card-text>
-            <ValidationObserver ref="validator">
-              <v-row dense>
-                <v-col cols="2">
-                  <ValidationProvider
-                    name="الرقم الوظيفي"
-                    v-slot="{ errors }"
-                    rules="required"
-                  >
+          </v-col>
+        </v-row>
+        <v-data-table
+          :headers="mainHeader"
+          :items="tableResponse.data"
+          :loading="loading"
+          item-key="id"
+          :options.sync="dataTableOptions"
+          :server-items-length="tableResponse.total"
+        >
+          <template v-slot:item.sn="{ item }">
+            {{
+              dataTableOptions.itemsPerPage * (dataTableOptions.page - 1) +
+                tableResponse.data.indexOf(item) +
+                1
+            }}
+          </template>
+          <template v-slot:item.email="{ item }">
+            <a :href="`mailto:${item.email}`">
+              {{ item.email }}
+            </a>
+          </template>
+
+          <template v-slot:item.action="{ item }">
+            <v-flex>
+              <v-btn color="primary" icon @click="edit(item)">
+                <v-icon>
+                  mdi-square-edit-outline
+                </v-icon>
+              </v-btn>
+              <v-btn color="error" icon @click="resetPassword(item)">
+                <v-icon>mdi-lock-reset</v-icon>
+              </v-btn>
+            </v-flex>
+          </template>
+        </v-data-table>
+      </v-card-text>
+
+      <v-card-text>
+        <error401 v-if="!hasAccess"></error401>
+      </v-card-text>
+      <v-card-actions>
+        <v-dialog dir="rtl" v-model="showDialog" width="60%">
+          <v-card>
+            <v-card-title>
+              تحرير موظف
+            </v-card-title>
+            <v-card-text>
+              <ValidationObserver ref="validator">
+                <v-row dense>
+                  <v-col cols="2">
+                    <ValidationProvider
+                      name="الرقم الوظيفي"
+                      v-slot="{ errors }"
+                      rules="required"
+                    >
+                      <v-text-field
+                        type="number"
+                        label="الرقم الوظيفي"
+                        dense
+                        :error-messages="errors"
+                        outlined
+                        v-model="selectedEmployee.empNumber"
+                      ></v-text-field
+                    ></ValidationProvider>
+                  </v-col>
+                  <v-col cols="6">
+                    <ValidationProvider
+                      name="اسم الموظف"
+                      v-slot="{ errors }"
+                      rules="required"
+                    >
+                      <v-text-field
+                        label="اسم الموظف"
+                        dense
+                        :error-messages="errors"
+                        outlined
+                        v-model="selectedEmployee.fullName"
+                      ></v-text-field
+                    ></ValidationProvider>
+                  </v-col>
+                  <v-col cols="4">
+                    <ValidationProvider
+                      name="الاسم المختصر"
+                      v-slot="{ errors }"
+                      rules="required"
+                    >
+                      <v-text-field
+                        label="الاسم المختصر"
+                        dense
+                        :error-messages="errors"
+                        outlined
+                        v-model="selectedEmployee.shortName"
+                      ></v-text-field
+                    ></ValidationProvider>
+                  </v-col>
+                  <v-col cols="6">
+                    <ValidationProvider
+                      name="الوظيفة"
+                      v-slot="{ errors }"
+                      rules="required"
+                    >
+                      <v-select
+                        label="الوظيفة"
+                        dense
+                        clearable
+                        :items="jobs"
+                        item-text="name"
+                        item-value="id"
+                        :error-messages="errors"
+                        outlined
+                        v-model="selectedEmployee.jobId"
+                      ></v-select>
+                    </ValidationProvider>
+                  </v-col>
+                  <v-col cols="6">
+                    <ValidationProvider
+                      name="الادارة / القسم / الشعبة"
+                      v-slot="{ errors }"
+                      rules="required"
+                    >
+                      <v-menu
+                        v-model="depMenu"
+                        :close-on-content-click="false"
+                        nudge-top="100px"
+                        nudge-width="50"
+                        transition="scale-transition"
+                        offset-y
+                        min-width="290px"
+                        max-height="450px"
+                      >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                            label="الادارة / القسم / الشعبة"
+                            dense
+                            clearable
+                            :error-messages="errors"
+                            outlined
+                            v-bind="attrs"
+                            prepend-inner-icon="mdi-cube-outline"
+                            v-on="on"
+                            :value="selectedEmployee.department.name"
+                          >
+                          </v-text-field>
+                        </template>
+                        <v-card>
+                          <v-card-title>الهيكل التنظيمي</v-card-title>
+                          <v-card-text>
+                            <v-row dense>
+                              <v-col cols="12" class="treePanel">
+                                <v-treeview
+                                  open-all
+                                  :active.sync="selectedDepartment"
+                                  dense
+                                  return-object
+                                  :items="root"
+                                  item-children="departmentList"
+                                  item-key="id"
+                                  activatable
+                                  hoverable
+                                >
+                                  <template v-slot:prepend="{ item }">
+                                    <v-icon
+                                      v-if="item.departmentList.length > 0"
+                                    >
+                                      mdi-view-grid
+                                    </v-icon>
+
+                                    <v-icon
+                                      v-if="item.departmentList.length == 0"
+                                    >
+                                      mdi-cube-outline
+                                    </v-icon>
+                                  </template>
+                                </v-treeview>
+                              </v-col>
+                            </v-row>
+                          </v-card-text>
+                          <v-card-actions>
+                            <v-btn
+                              text
+                              color="primary"
+                              @click="updateSelectedDepartment"
+                            >
+                              إختيار
+                            </v-btn>
+                            <v-btn
+                              text
+                              dark
+                              color="red"
+                              @click="depMenu = false"
+                            >
+                              إلغاء
+                            </v-btn>
+                          </v-card-actions>
+                        </v-card>
+                      </v-menu>
+                    </ValidationProvider>
+                  </v-col>
+                </v-row>
+                <v-row dense>
+                  <v-col cols="6">
+                    <ValidationProvider
+                      name="البريد الإلكتروني"
+                      v-slot="{ errors }"
+                      rules="required"
+                    >
+                      <v-text-field
+                        label="البريد الإلكتروني"
+                        dense
+                        :error-messages="errors"
+                        outlined
+                        v-model="selectedEmployee.email"
+                      ></v-text-field
+                    ></ValidationProvider>
+                  </v-col>
+                  <v-col cols="3">
                     <v-text-field
-                      type="number"
-                      label="الرقم الوظيفي"
+                      label="رقم الهاتف"
                       dense
-                      :error-messages="errors"
                       outlined
-                      v-model="selectedEmployee.empNumber"
-                    ></v-text-field
-                  ></ValidationProvider>
-                </v-col>
-                <v-col cols="6">
-                  <ValidationProvider
-                    name="اسم الموظف"
-                    v-slot="{ errors }"
-                    rules="required"
-                  >
-                    <v-text-field
-                      label="اسم الموظف"
-                      dense
-                      :error-messages="errors"
-                      outlined
-                      v-model="selectedEmployee.fullName"
-                    ></v-text-field
-                  ></ValidationProvider>
-                </v-col>
-                <v-col cols="4">
-                  <ValidationProvider
-                    name="الاسم المختصر"
-                    v-slot="{ errors }"
-                    rules="required"
-                  >
-                    <v-text-field
-                      label="الاسم المختصر"
-                      dense
-                      :error-messages="errors"
-                      outlined
-                      v-model="selectedEmployee.shortName"
-                    ></v-text-field
-                  ></ValidationProvider>
-                </v-col>
-                <v-col cols="6">
-                  <ValidationProvider
-                    name="الوظيفة"
-                    v-slot="{ errors }"
-                    rules="required"
-                  >
-                    <v-select
-                      label="الوظيفة"
-                      dense
-                      clearable
-                      :items="jobs"
-                      item-text="name"
-                      item-value="id"
-                      :error-messages="errors"
-                      outlined
-                      v-model="selectedEmployee.jobId"
-                    ></v-select>
-                  </ValidationProvider>
-                </v-col>
-                <v-col cols="6">
-                  <ValidationProvider
-                    name="الادارة / القسم / الشعبة"
-                    v-slot="{ errors }"
-                    rules="required"
-                  >
+                      v-model="selectedEmployee.mobileNumber"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="2">
+                    <v-switch v-model="selectedEmployee.gender">
+                      <template v-slot:label>
+                        {{ selectedEmployee.gender ? 'ذكر' : 'أنثى' }}
+                      </template></v-switch
+                    >
+                  </v-col>
+                </v-row>
+                <v-row dense>
+                  <v-col cols="4" sm="6" md="4">
                     <v-menu
-                      v-model="depMenu"
+                      v-model="dobMenu"
                       :close-on-content-click="false"
-                      nudge-top="100px"
-                      nudge-width="50"
+                      :nudge-right="40"
                       transition="scale-transition"
                       offset-y
                       min-width="290px"
-                      max-height="450px"
                     >
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
-                          label="الادارة / القسم / الشعبة"
                           dense
-                          clearable
-                          :error-messages="errors"
                           outlined
+                          v-model="selectedEmployee.dob"
+                          label="تاريخ الميلاد"
+                          prepend-icon="mdi-calendar"
+                          readonly
                           v-bind="attrs"
-                          prepend-inner-icon="mdi-cube-outline"
                           v-on="on"
-                          :value="selectedEmployee.department.name"
-                        >
-                        </v-text-field>
+                        ></v-text-field>
                       </template>
-                      <v-card>
-                        <v-card-title>الهيكل التنظيمي</v-card-title>
-                        <v-card-text>
-                          <v-row dense>
-                            <v-col cols="12" class="treePanel">
-                              <v-treeview
-                                open-all
-                                :active.sync="selectedDepartment"
-                                dense
-                                return-object
-                                :items="root"
-                                item-children="departmentList"
-                                item-key="id"
-                                activatable
-                                hoverable
-                              >
-                                <template v-slot:prepend="{ item }">
-                                  <v-icon v-if="item.departmentList.length > 0">
-                                    mdi-view-grid
-                                  </v-icon>
-
-                                  <v-icon
-                                    v-if="item.departmentList.length == 0"
-                                  >
-                                    mdi-cube-outline
-                                  </v-icon>
-                                </template>
-                              </v-treeview>
-                            </v-col>
-                          </v-row>
-                        </v-card-text>
-                        <v-card-actions>
-                          <v-btn
-                            text
-                            color="primary"
-                            @click="updateSelectedDepartment"
-                          >
-                            إختيار
-                          </v-btn>
-                          <v-btn text dark color="red" @click="depMenu = false">
-                            إلغاء
-                          </v-btn>
-                        </v-card-actions>
-                      </v-card>
-                    </v-menu>
-                  </ValidationProvider>
-                </v-col>
-              </v-row>
-              <v-row dense>
-                <v-col cols="6">
-                  <ValidationProvider
-                    name="البريد الإلكتروني"
-                    v-slot="{ errors }"
-                    rules="required"
-                  >
-                    <v-text-field
-                      label="البريد الإلكتروني"
-                      dense
-                      :error-messages="errors"
-                      outlined
-                      v-model="selectedEmployee.email"
-                    ></v-text-field
-                  ></ValidationProvider>
-                </v-col>
-                <v-col cols="3">
-                  <v-text-field
-                    label="رقم الهاتف"
-                    dense
-                    outlined
-                    v-model="selectedEmployee.mobileNumber"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="2">
-                  <v-switch v-model="selectedEmployee.gender">
-                    <template v-slot:label>
-                      {{ selectedEmployee.gender ? 'ذكر' : 'أنثى' }}
-                    </template></v-switch
-                  >
-                </v-col>
-              </v-row>
-              <v-row dense>
-                <v-col cols="4" sm="6" md="4">
-                  <v-menu
-                    v-model="dobMenu"
-                    :close-on-content-click="false"
-                    :nudge-right="40"
-                    transition="scale-transition"
-                    offset-y
-                    min-width="290px"
-                  >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        dense
-                        outlined
+                      <v-date-picker
                         v-model="selectedEmployee.dob"
-                        label="تاريخ الميلاد"
-                        prepend-icon="mdi-calendar"
-                        readonly
-                        v-bind="attrs"
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      v-model="selectedEmployee.dob"
-                      @input="dobMenu = false"
-                    ></v-date-picker>
-                  </v-menu>
-                </v-col>
-                <v-col cols="3">
-                  <ValidationProvider
-                    name="اسم المستخدم"
-                    v-slot="{ errors }"
-                    rules="required"
-                  >
-                    <v-text-field
-                      label="اسم المستخدم"
-                      dense
-                      :error-messages="errors"
-                      outlined
-                      v-model="selectedEmployee.user.username"
+                        @input="dobMenu = false"
+                      ></v-date-picker>
+                    </v-menu>
+                  </v-col>
+                  <v-col cols="3">
+                    <ValidationProvider
+                      name="اسم المستخدم"
+                      v-slot="{ errors }"
+                      rules="required"
                     >
-                    </v-text-field>
-                  </ValidationProvider>
-                </v-col>
-                <v-col cols="2">
-                  <v-switch v-model="selectedEmployee.user.active">
-                    <template v-slot:label>
-                      {{ selectedEmployee.user.active ? 'ممكن' : 'غير ممكن' }}
-                    </template>
-                  </v-switch>
-                </v-col>
-              </v-row>
-            </ValidationObserver>
-          </v-card-text>
-          <v-card-actions>
-            <v-btn
-              :loading="saving"
-              :disabled="saving"
-              color="primary"
-              @click="save()"
-            >
-              حفظ
-              <v-icon>
-                mdi-content-save
-              </v-icon>
-            </v-btn>
-            <v-btn color="red" dark @click="showDialog = false">
-              إلغاء
-              <v-icon>
-                mdi-close
-              </v-icon>
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-card-actions>
-    <v-card-text>
-      <error401 v-if="!hasAccess"></error401>
-    </v-card-text>
-  </v-card>
+                      <v-text-field
+                        label="اسم المستخدم"
+                        dense
+                        :error-messages="errors"
+                        outlined
+                        v-model="selectedEmployee.user.username"
+                      >
+                      </v-text-field>
+                    </ValidationProvider>
+                  </v-col>
+                  <v-col cols="2">
+                    <v-switch v-model="selectedEmployee.user.active">
+                      <template v-slot:label>
+                        {{ selectedEmployee.user.active ? 'ممكن' : 'غير ممكن' }}
+                      </template>
+                    </v-switch>
+                  </v-col>
+                </v-row>
+              </ValidationObserver>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn
+                :loading="saving"
+                :disabled="saving"
+                color="primary"
+                @click="save()"
+              >
+                حفظ
+                <v-icon>
+                  mdi-content-save
+                </v-icon>
+              </v-btn>
+              <v-btn color="red" dark @click="showDialog = false">
+                إلغاء
+                <v-icon>
+                  mdi-close
+                </v-icon>
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-card-actions>
+    </v-card>
+  </div>
 </template>
 
 <script>
@@ -427,7 +436,7 @@ export default {
           let enc_id = this.selectedEmployee.encId
           EmployeeService.save(this.selectedEmployee)
             .then(response => {
-              this.selectedEmployee = response.data
+              this.selectedEmployee = response.data.employee
               if (enc_id === -1) {
                 this.tableResponse.data.splice(0, 0, this.selectedEmployee)
               } else {
@@ -442,7 +451,16 @@ export default {
             })
             .catch(error => {
               this.saving = false
-              if (error.response.data.id) {
+              console.log(error.response.data)
+              if (error.response.data.errorCode) {
+                if (error.response.data.errorCode == 1) {
+                  this.$toast.error('رقم الموظف مستخدم لموظف أخر')
+                } else if (error.response.data.errorCode == 2) {
+                  this.$toast.error(
+                    'اسم المستخدم , غير متاح تم الاستخدام لموظف أخر'
+                  )
+                }
+              } else if (error.response.data.id) {
                 this.$toast.error(
                   'هناك خطأ في عملية الحفظ' +
                     ' رقم الخطأ ' +
@@ -458,13 +476,13 @@ export default {
 
     creatNew() {
       this.showDialog = true
-      this.selectedEmployee = Object.assign({}, this.emptyEmployee)
-      this.selectedEmployee.user = Object.assign({}, this.emptyUser)
+      this.selectedEmployee = _.cloneDeep(this.emptyEmployee)
+      this.selectedEmployee.user = _.cloneDeep(this.emptyUser)
     },
     edit(item) {
       this.selectedDepartment = []
       this.showDialog = true
-      this.selectedEmployee = Object.assign({}, item)
+      this.selectedEmployee = _.cloneDeep(item)
       this.selectedDepartment.push(this.selectedEmployee.department)
     },
     updateSelectedDepartment() {

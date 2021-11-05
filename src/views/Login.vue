@@ -74,10 +74,15 @@
                   :disabled="working"
                   @click="login()"
                 >
-                  <v-icon right>mdi-login-variant mdi-flip-h</v-icon>
                   تسجيل دخول
+                  <v-icon right>mdi-login-variant mdi-flip-h</v-icon>
                 </v-btn>
-                <v-btn color="red" plain :disabled="working">
+                <v-btn
+                  color="red"
+                  plain
+                  :disabled="working"
+                  :to="{ name: 'Home' }"
+                >
                   إلغاء
                 </v-btn>
               </v-card-actions>

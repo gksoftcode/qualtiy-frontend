@@ -26,6 +26,9 @@ export default {
 
   data() {
     return {
+      currentNext: 0,
+      remarks: '',
+      msgDlg: false,
       correctionHeader: [
         {
           text: 'مسلسل',
@@ -275,7 +278,12 @@ export default {
       let ha = false
       try {
         this.employee.roles.forEach(item => {
-          if (item === 'ROLE_QUALITY' || item === 'ROLE_ADMIN') {
+          if (
+            this.selectedReport.status <= 10 &&
+            (item === 'ROLE_QUALITY_USER' ||
+              item === 'ROLE_QUALITY' ||
+              item === 'ROLE_ADMIN')
+          ) {
             ha = true
           }
         })
@@ -301,6 +309,32 @@ export default {
       }
       return ha
     },
+    hasApproveAccess: function() {
+      let ha = false
+      try {
+        this.employee.roles.forEach(item => {
+          if (item === 'ROLE_ADMIN' || item === 'ROLE_QUALITY') {
+            ha = true
+          }
+        })
+      } catch (e) {
+        return false
+      }
+      return ha
+    },
+    hasFinalApproveAccess: function() {
+      let ha = false
+      try {
+        this.employee.roles.forEach(item => {
+          if (this.canEdit || item === 'ROLE_MANAGER') {
+            ha = true
+          }
+        })
+      } catch (e) {
+        return false
+      }
+      return ha
+    },
     ...mapState('auth', ['employee'])
   },
   watch: {
@@ -316,15 +350,7 @@ export default {
       this.selectedReport = Object.assign({}, this.emptyReport)
       this.loading = false
     } else {
-      this.loading = true
-      AuditReportService.getOne(this.encId)
-        .then(res => {
-          this.selectedReport = res.data
-          this.loading = false
-        })
-        .catch(error => {
-          this.loading = false
-        })
+      this.loadOne()
     }
     DepartmentService.listDepartments()
       .then(response => {
@@ -349,6 +375,64 @@ export default {
   },
 
   methods: {
+    loadOne() {
+      this.loading = true
+      AuditReportService.getOne(this.encId)
+        .then(res => {
+          this.selectedReport = res.data
+          this.loading = false
+        })
+        .catch(error => {
+          this.loading = false
+        })
+    },
+    send(next) {
+      let msg = ''
+      switch (next) {
+        case 20:
+          msg = 'هل تود الارسال للإعتماد'
+          break
+        case 10:
+          msg = 'هل تود ارجاع التقرير'
+          break
+        case 30:
+          msg = 'هل تود اعتماد التقرير'
+      }
+      this.$confirm(msg).then(res => {
+        if (res) {
+          this.currentNext = next
+          this.remarks = ''
+          this.msgDlg = true
+        }
+      })
+    },
+    saveSend() {
+      this.loading = true
+      AuditReportService.updateStatus(
+        this.selectedReport.encId,
+        this.currentNext,
+        this.remarks
+      )
+        .then(res => {
+          if (res.data.success) {
+            this.$toast.success('تمت العملية بنجاح')
+            this.loadOne()
+          }
+          this.msgDlg = false
+          this.loading = false
+        })
+        .catch(err => {
+          if (err.response.data.id) {
+            this.$toast.error(
+              'خطأ في العلية' + ' رقم الخطأ ' + err.response.data.id
+            )
+          } else {
+            this.$toast.error('خطأ في العلية')
+          }
+          this.msgDlg = false
+          this.loading = false
+        })
+    },
     listCorrectionByAudit() {
       this.loadingCorrectionTab = true
       this.dataTableRequest.currentPage = this.dataTableOptions.page - 1

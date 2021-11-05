@@ -1,5 +1,8 @@
 <template>
   <div class="AuditReport">
+    <v-overlay :value="loading">
+      <v-progress-circular indeterminate size="128"></v-progress-circular>
+    </v-overlay>
     <v-card :loading="loading" elevation="2" class="custom-heading">
       <v-card-title>
         <v-toolbar-items>
@@ -49,6 +52,8 @@
                 <v-row dense>
                   <v-col cols="8">
                     <v-text-field
+                      :readonly="!canEdit"
+                      :filled="!canEdit"
                       outlined
                       dense
                       label="مسمى التدقيق"
@@ -57,6 +62,8 @@
                   </v-col>
                   <v-col cols="2">
                     <v-select
+                      :readonly="!canEdit"
+                      :filled="!canEdit"
                       outlined
                       :items="years"
                       item-value="id"
@@ -68,6 +75,8 @@
                   </v-col>
                   <v-col cols="8">
                     <v-text-field
+                      :readonly="!canEdit"
+                      :filled="!canEdit"
                       outlined
                       dense
                       label="مجال التدقيق"
@@ -76,6 +85,8 @@
                   </v-col>
                   <v-col cols="2">
                     <v-text-field
+                      :readonly="!canEdit"
+                      :filled="!canEdit"
                       outlined
                       type="number"
                       dense
@@ -86,7 +97,13 @@
                 </v-row>
                 <v-row dense>
                   <v-col cols="12">
-                    <v-radio-group v-model="selectedReport.auditType" dense row>
+                    <v-radio-group
+                      :readonly="!canEdit"
+                      :filled="!canEdit"
+                      v-model="selectedReport.auditType"
+                      dense
+                      row
+                    >
                       <template v-slot:label>
                         <span class="primary-text font-weight-bold">
                           الهدف من التدقيق
@@ -171,7 +188,12 @@
                             mdi-format-list-checks
                           </v-icon>
                         </v-btn>
-                        <v-btn color="red" icon @click="deleteAuditPlan(item)">
+                        <v-btn
+                          v-if="canEdit"
+                          color="red"
+                          icon
+                          @click="deleteAuditPlan(item)"
+                        >
                           <v-icon>mdi-trash-can </v-icon>
                         </v-btn>
                       </template>
@@ -249,6 +271,7 @@
                       </v-icon>
                     </v-btn>
                     <v-btn
+                      v-show="canEdit"
                       color="error"
                       icon
                       @click="deleteCorrectionById(item.encId)"
@@ -268,6 +291,7 @@
                 <v-row dense>
                   <v-col cols="8">
                     <v-text-field
+                      v-show="canEdit"
                       label="نقطة القوة"
                       outlined
                       dense
@@ -320,6 +344,7 @@
                 <v-row dense>
                   <v-col cols="8">
                     <v-text-field
+                      v-show="canEdit"
                       label="نقطة الضعف"
                       outlined
                       dense
@@ -372,6 +397,8 @@
                 <v-row dense>
                   <v-col cols="12">
                     <v-textarea
+                      :readonly="!canEdit"
+                      :filled="!canEdit"
                       label="الملاحظات"
                       dense
                       outlined
@@ -394,6 +421,46 @@
           v-if="canEdit"
         >
           حفظ
+          <v-icon>
+            mdi-content-save
+          </v-icon>
+        </v-btn>
+        <v-btn
+          color="warning darken-1"
+          @click="send(20)"
+          :loading="saving"
+          :disabled="saving"
+          v-if="
+            selectedReport.status <= 10 &&
+              hasApproveAccess &&
+              selectedReport.encId !== '-1'
+          "
+        >
+          ارسال
+          <v-icon>
+            mdi-send-outline
+          </v-icon>
+        </v-btn>
+        <v-btn
+          color="warning darken-1"
+          @click="send(10)"
+          :loading="saving"
+          :disabled="saving"
+          v-if="selectedReport.status === 20 && hasFinalApproveAccess"
+        >
+          ارجاع
+          <v-icon>
+            mdi-content-save
+          </v-icon>
+        </v-btn>
+        <v-btn
+          color="primary"
+          @click="send(30)"
+          :loading="saving"
+          :disabled="saving"
+          v-if="selectedReport.status === 20 && hasFinalApproveAccess"
+        >
+          اعتماد
           <v-icon>
             mdi-content-save
           </v-icon>
@@ -568,6 +635,38 @@
         </v-card-text>
         <v-card-actions>
           <v-btn text color="error" @click="viewDialog = false">
+            إغلاق
+            <v-icon>
+              mdi-close
+            </v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog dir="RTL" v-model="msgDlg" width="60%" persistent>
+      <v-card>
+        <v-card-title>
+          متابعة التقرير
+        </v-card-title>
+        <v-card-text>
+          <v-row dense>
+            <v-col cols="12">
+              <v-textarea
+                rows="2"
+                v-model="remarks"
+                dense
+                outlined
+                label="الملاحظات والاسباب"
+              ></v-textarea>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="primary" text @click="saveSend">
+            موافق
+            <v-icon> mdi-check-circle-outline</v-icon>
+          </v-btn>
+          <v-btn color="error" text @click="msgDlg = false">
             إغلاق
             <v-icon>
               mdi-close

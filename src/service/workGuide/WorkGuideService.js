@@ -30,6 +30,14 @@ export default {
       }
     )
   },
+  delete: async work_guide => {
+    return await axios.delete(
+      Paths.BASE_URL + Paths.WORK_GUIDE_PATH + '/' + work_guide.id,
+      {
+        headers: authHeader()
+      }
+    )
+  },
   getOne: async encId => {
     return await axios.get(
       Paths.BASE_URL + Paths.WORK_GUIDE_PATH + '/' + encId,

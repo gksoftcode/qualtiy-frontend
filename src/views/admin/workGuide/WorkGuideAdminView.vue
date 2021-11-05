@@ -8,7 +8,7 @@
         </v-overlay>
         <v-btn
           color="primary"
-          v-show="actions.HAS_STEP_1"
+          v-show="actions && actions.HAS_STEP_1"
           @click="statusAction(10, 0)"
         >
           <v-icon> mdi-send</v-icon>
@@ -16,7 +16,7 @@
         </v-btn>
         <v-btn
           color="primary"
-          v-show="actions.HAS_STEP_2"
+          v-show="actions && actions.HAS_STEP_2"
           @click="statusAction(20, 2)"
         >
           <v-icon>mdi-send-check</v-icon>
@@ -24,7 +24,7 @@
         </v-btn>
         <v-btn
           color="orange darken-1"
-          v-show="actions.HAS_STEP_2"
+          v-show="actions && actions.HAS_STEP_2"
           @click="rejectAction(15, 1)"
         >
           <v-icon> mdi-backup-restore</v-icon>
@@ -32,7 +32,7 @@
         </v-btn>
         <v-btn
           color="primary darken-1"
-          v-show="actions.HAS_STEP_3"
+          v-show="actions && actions.HAS_STEP_3"
           @click="statusAction(30, 4)"
         >
           <v-icon>mdi-send-check</v-icon>
@@ -41,7 +41,7 @@
         <v-btn
           color="orange darken-2"
           dark
-          v-show="actions.HAS_STEP_3"
+          v-show="actions && actions.HAS_STEP_3"
           @click="rejectAction(25, 3)"
         >
           <v-icon> mdi-backup-restore</v-icon>
@@ -49,7 +49,7 @@
         </v-btn>
         <v-btn
           color="primary darken-2"
-          v-show="actions.HAS_STEP_4"
+          v-show="actions && actions.HAS_STEP_4"
           @click="statusAction(40, 5)"
         >
           <v-icon>mdi-send-check</v-icon>
@@ -207,7 +207,12 @@ export default {
       nextStatus: 0,
       rejectDlg: false,
       sending: false,
-      actions: null,
+      actions: {
+        HAS_STEP_1: false,
+        HAS_STEP_2: false,
+        HAS_STEP_3: false,
+        HAS_STEP_4: false
+      },
       remarks: '',
       messages: [
         'هل تود ارسال الدليل للاعتماد',

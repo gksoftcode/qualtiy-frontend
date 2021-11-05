@@ -21,6 +21,8 @@ import CheckListEditor from '@/views/admin/audit/CheckListEditor'
 import Bug from '@/views/admin/bug/Bug'
 import AuditReport from '@/views/admin/audit/AuditReport/AuditReport'
 import AuditReportSearch from '@/views/admin/audit/AuditReportSearch'
+import Document from '@/views/admin/document/Document'
+import WebSocket from '@/views/admin/websocket/WebSocket'
 
 Vue.use(VueRouter)
 
@@ -86,6 +88,22 @@ const routes = [
         }
       },
       {
+        path: '/admin/webSocket',
+        name: 'WebSocket',
+        component: WebSocket,
+        meta: {
+          title: 'WebSocket'
+        }
+      },
+      {
+        path: '/admin/document',
+        name: 'Document',
+        component: Document,
+        meta: {
+          title: 'إدارة الوثائق'
+        }
+      },
+      {
         path: '/admin/department',
         name: 'Department',
         component: Department,
@@ -132,7 +150,7 @@ const routes = [
         props: true,
         component: WorkGuideEditor,
         meta: {
-          title: 'تحرير دليل اجرآات'
+          title: 'تحرير دليل الاجراءات'
         }
       },
       {
@@ -175,6 +193,7 @@ const routes = [
   },
   {
     path: '/',
+    name: 'Home',
     component: Home,
     children: [
       {

@@ -1,7 +1,7 @@
 <template>
   <div class="workGuideEditor">
     <v-overlay :value="loading" :absolute="true">
-      <v-progress-circular indeterminate size="64"></v-progress-circular>
+      <v-progress-circular indeterminate size="128"></v-progress-circular>
     </v-overlay>
     <v-card :loading="loading">
       <v-card-text>
@@ -21,7 +21,7 @@
             <v-text-field
               readonly
               :value="documentNumber"
-              label="رقم الوثيقة"
+              label="رقم الدليل"
               dense
               outlined
             ></v-text-field>
@@ -90,11 +90,24 @@
             <fieldset class="wc-fieldset">
               <legend>
                 3 - مراجع
-                <v-btn icon color="primary" @click="createNewReference">
-                  <v-icon>
-                    mdi-plus
-                  </v-icon>
-                </v-btn>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      icon
+                      color="primary"
+                      @click="createNewReference"
+                      v-bind="attrs"
+                      v-on="on"
+                    >
+                      <v-icon>
+                        mdi-plus
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>
+                    اضافة مرجع
+                  </span>
+                </v-tooltip>
               </legend>
               <draggable
                 dir="rtl"
@@ -114,7 +127,7 @@
                           <template v-slot:activator="{ on, attrs }">
                             <v-btn
                               icon
-                              color="green lighten-1"
+                              color="primary"
                               @click="editReference(rfc)"
                               v-bind="attrs"
                               v-on="on"
@@ -128,7 +141,7 @@
                           <template v-slot:activator="{ on, attrs }">
                             <v-btn
                               icon
-                              color="red darken-2"
+                              color="error"
                               @click="deleteReference(rfc)"
                               v-bind="attrs"
                               v-on="on"
@@ -151,11 +164,24 @@
             <fieldset class="wc-fieldset">
               <legend>
                 4 - المصطلحات والتعاريف
-                <v-btn icon color="primary" @click="createNewDefinition">
-                  <v-icon>
-                    mdi-plus
-                  </v-icon>
-                </v-btn>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      icon
+                      color="primary"
+                      @click="createNewDefinition"
+                      v-bind="attrs"
+                      v-on="on"
+                    >
+                      <v-icon>
+                        mdi-plus
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>
+                    اضافة مصطلح
+                  </span>
+                </v-tooltip>
               </legend>
               <draggable
                 dir="rtl"
@@ -166,19 +192,22 @@
                 <transition-group type="transition" :name="'flip-list'">
                   <template v-for="dfn in selected.definitions">
                     <v-row dense :key="dfn.id">
-                      <v-col cols="11">
+                      <v-col cols="12">
                         <span
                           class="definitionTitle"
                           v-text="dfn.orderNo + ' - '"
                         ></span>
                         <span class="definitionTitle" v-text="dfn.name"></span>
                       </v-col>
+                      <v-col cols="11">
+                        <span v-text="dfn.description"></span>
+                      </v-col>
                       <v-col cols="1" :key="dfn.id">
                         <v-tooltip top>
                           <template v-slot:activator="{ on, attrs }">
                             <v-btn
                               icon
-                              color="green lighten-1"
+                              color="primary"
                               @click="editDefinition(dfn)"
                               v-bind="attrs"
                               v-on="on"
@@ -193,7 +222,7 @@
                             <v-btn
                               dark
                               icon
-                              color="red darken-2"
+                              color="error"
                               @click="deleteDefinition(dfn)"
                               v-bind="attrs"
                               v-on="on"
@@ -204,9 +233,7 @@
                           <span>حذف</span>
                         </v-tooltip>
                       </v-col>
-                      <v-col cols="12">
-                        <span v-text="dfn.description"></span>
-                      </v-col>
+                      <v-divider inset></v-divider>
                     </v-row>
                   </template>
                 </transition-group>
@@ -219,11 +246,24 @@
             <fieldset class="wc-fieldset">
               <legend>
                 5 - المسؤوليات
-                <v-btn icon color="primary" @click="createNewResponsibility">
-                  <v-icon>
-                    mdi-plus
-                  </v-icon>
-                </v-btn>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      icon
+                      color="primary"
+                      @click="createNewResponsibility"
+                      v-bind="attrs"
+                      v-on="on"
+                    >
+                      <v-icon>
+                        mdi-plus
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>
+                    اضافة مسؤولية
+                  </span>
+                </v-tooltip>
               </legend>
               <draggable
                 dir="rtl"
@@ -234,19 +274,23 @@
                 <transition-group type="transition" :name="'flip-list'">
                   <template v-for="resp in selected.responsibilities">
                     <v-row dense :key="resp.id">
-                      <v-col cols="11">
+                      <v-col cols="12">
                         <span
                           class="definitionTitle"
                           v-text="resp.orderNo + ' - '"
                         />
                         <span class="definitionTitle" v-text="resp.job.name" />
                       </v-col>
+
+                      <v-col cols="11">
+                        <span v-text="resp.description" />
+                      </v-col>
                       <v-col cols="1" :key="resp.id">
                         <v-tooltip top>
                           <template v-slot:activator="{ on, attrs }">
                             <v-btn
                               icon
-                              color="green lighten-1"
+                              color="primary"
                               @click="editResponsibility(resp)"
                               v-bind="attrs"
                               v-on="on"
@@ -261,7 +305,7 @@
                             <v-btn
                               dark
                               icon
-                              color="red darken-2"
+                              color="error"
                               @click="deleteResponsibility(resp)"
                               v-bind="attrs"
                               v-on="on"
@@ -272,9 +316,7 @@
                           <span>حذف</span>
                         </v-tooltip>
                       </v-col>
-                      <v-col cols="12">
-                        <span v-text="resp.description" />
-                      </v-col>
+                      <v-divider inset></v-divider>
                     </v-row>
                   </template>
                 </transition-group>
@@ -287,11 +329,22 @@
             <fieldset class="wc-fieldset">
               <legend>
                 6 - الاجراءات
-                <v-btn icon color="primary" @click="createNewProcedure">
-                  <v-icon>
-                    mdi-plus
-                  </v-icon>
-                </v-btn>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      v-bind="attrs"
+                      v-on="on"
+                      icon
+                      color="primary"
+                      @click="createNewProcedure"
+                    >
+                      <v-icon>
+                        mdi-plus
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>اضافة إجراء</span>
+                </v-tooltip>
               </legend>
               <template v-for="proc in selected.procedures">
                 <v-card class="mb-2" :key="proc.id">
@@ -302,22 +355,49 @@
                           class="procedure-title"
                           v-text="proc.description"
                         ></span>
-                        <v-btn
-                          icon
-                          color="primary"
-                          @click="createNewStep(proc)"
-                        >
-                          <v-icon>
-                            mdi-plus-circle
-                          </v-icon>
-                        </v-btn>
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                              v-bind="attrs"
+                              v-on="on"
+                              icon
+                              color="primary"
+                              @click="createNewStep(proc)"
+                            >
+                              <v-icon>
+                                mdi-plus-circle
+                              </v-icon>
+                            </v-btn>
+                          </template>
+                          <span>
+                            اضافة خطوة
+                          </span>
+                        </v-tooltip>
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                              v-bind="attrs"
+                              v-on="on"
+                              icon
+                              color="primary"
+                              @click="manageProsResp(proc)"
+                            >
+                              <v-icon>
+                                mdi-account-cog
+                              </v-icon>
+                            </v-btn>
+                          </template>
+                          <span>
+                            المسؤوليات
+                          </span>
+                        </v-tooltip>
                       </v-col>
                       <v-col cols="1">
                         <v-tooltip top>
                           <template v-slot:activator="{ on, attrs }">
                             <v-btn
                               icon
-                              color="green lighten-1"
+                              color="primary"
                               @click="editProcedure(proc)"
                               v-bind="attrs"
                               v-on="on"
@@ -332,7 +412,7 @@
                             <v-btn
                               dark
                               icon
-                              color="red darken-2"
+                              color="error"
                               @click="deleteProcedure(proc)"
                               v-bind="attrs"
                               v-on="on"
@@ -346,7 +426,22 @@
                       <v-col cols="12">
                         <v-data-table
                           dense
-                          :headers="procedureHeader"
+                          :headers="
+                            procedureHeader1
+                              .concat(
+                                proc.responsibilities.map((pro, idx) => {
+                                  return {
+                                    text: pro.name,
+                                    value: 'val' + (idx + 1),
+                                    align: 'center',
+                                    sortable: false,
+                                    filterable: false,
+                                    width: '5%'
+                                  }
+                                })
+                              )
+                              .concat(procedureHeader2)
+                          "
                           :items="proc.steps"
                         >
                           <template v-slot:item.orderNo="{ item }">
@@ -372,11 +467,74 @@
                           </template>
                           <template v-slot:item.files="{ item }">
                             <v-row dense>
-                              <v-btn icon @click="showFilesDlg(item)">
-                                <v-icon color="primary">
-                                  mdi-link-plus
+                              <v-tooltip bottom>
+                                <template v-slot:activator="{ on, attrs }">
+                                  <v-btn
+                                    v-bind="attrs"
+                                    v-on="on"
+                                    icon
+                                    @click="showFilesDlg(item)"
+                                  >
+                                    <v-icon color="primary">
+                                      mdi-link-plus
+                                    </v-icon>
+                                  </v-btn>
+                                </template>
+                                <span>
+                                  اضافة وثيقة أو سجل
+                                </span>
+                              </v-tooltip>
+                              <v-tooltip bottom>
+                                <template v-slot:activator="{ on, attrs }">
+                                  <v-btn
+                                    v-bind="attrs"
+                                    v-on="on"
+                                    icon
+                                    @click="createDocs(item)"
+                                  >
+                                    <v-icon color="primary">
+                                      mdi-link-plus
+                                    </v-icon>
+                                  </v-btn>
+                                </template>
+                                <span>
+                                  اضافة وثيقة نصية
+                                </span>
+                              </v-tooltip>
+                              <v-col
+                                cols="12"
+                                v-for="doc in item.docs"
+                                :key="doc"
+                              >
+                                <span>
+                                  {{ doc }}
+                                </span>
+                                <v-icon
+                                  dark
+                                  class="mdi-18px float-left"
+                                  color="error"
+                                  @click="removeDocFromStep(doc, item)"
+                                >
+                                  mdi-minus-circle
                                 </v-icon>
-                              </v-btn>
+                              </v-col>
+                              <v-col
+                                cols="12"
+                                v-for="doc in item.documentTypes"
+                                :key="doc.id"
+                              >
+                                <span>
+                                  {{ doc.name }}
+                                </span>
+                                <v-icon
+                                  dark
+                                  class="mdi-18px float-left"
+                                  color="error"
+                                  @click="removeDocumentFromStep(doc, item)"
+                                >
+                                  mdi-minus-circle
+                                </v-icon>
+                              </v-col>
                               <v-col
                                 cols="12"
                                 v-for="file in item.files"
@@ -386,7 +544,7 @@
                                 <v-icon
                                   dark
                                   class="mdi-18px float-left"
-                                  color="red lighten-1"
+                                  color="error"
                                   @click="removeFileFromStep(file, item)"
                                 >
                                   mdi-link-off
@@ -423,14 +581,22 @@
                             <v-checkbox v-model="item.val9"></v-checkbox>
                           </template>
                           <template v-slot:item.action="{ item }">
-                            <v-btn
-                              dark
-                              icon
-                              color="red darken-2"
-                              @click="deleteStep(item, proc)"
-                            >
-                              <v-icon>mdi-trash-can-outline </v-icon>
-                            </v-btn>
+                            <v-tooltip top>
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-btn
+                                  v-bind="attrs"
+                                  v-on="on"
+                                  icon
+                                  color="error"
+                                  @click="deleteStep(item, proc)"
+                                >
+                                  <v-icon>mdi-trash-can-outline </v-icon>
+                                </v-btn>
+                              </template>
+                              <span>
+                                حذف
+                              </span>
+                            </v-tooltip>
                           </template>
                         </v-data-table>
                       </v-col>
@@ -458,13 +624,25 @@
             <fieldset class="wc-fieldset">
               <legend>
                 7 - مؤشرات القياس
-                <v-btn icon color="primary" @click="createNewPointer">
-                  <v-icon>
-                    mdi-plus
-                  </v-icon>
-                </v-btn>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      v-bind="attrs"
+                      v-on="on"
+                      icon
+                      color="primary"
+                      @click="createNewPointer"
+                    >
+                      <v-icon>
+                        mdi-plus
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>
+                    اضافة مؤشر
+                  </span>
+                </v-tooltip>
               </legend>
-
               <draggable
                 dir="rtl"
                 :list="selected.pointers"
@@ -479,21 +657,38 @@
                         <span v-text="ptr.name" />
                       </v-col>
                       <v-col cols="1">
-                        <v-btn
-                          icon
-                          color="green lighten-1"
-                          @click="editPointer(ptr)"
-                        >
-                          <v-icon>mdi-square-edit-outline</v-icon>
-                        </v-btn>
-                        <v-btn
-                          dark
-                          icon
-                          color="red darken-2"
-                          @click="deletePinter(ptr)"
-                        >
-                          <v-icon> mdi-trash-can-outline</v-icon>
-                        </v-btn>
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                              v-bind="attrs"
+                              v-on="on"
+                              icon
+                              color="primary"
+                              @click="editPointer(ptr)"
+                            >
+                              <v-icon>mdi-square-edit-outline</v-icon>
+                            </v-btn>
+                          </template>
+                          <span>
+                            تحرير
+                          </span>
+                        </v-tooltip>
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                              icon
+                              v-bind="attrs"
+                              v-on="on"
+                              color="error"
+                              @click="deletePinter(ptr)"
+                            >
+                              <v-icon> mdi-trash-can-outline</v-icon>
+                            </v-btn>
+                          </template>
+                          <span>
+                            حذف
+                          </span>
+                        </v-tooltip>
                       </v-col>
                     </v-row>
                   </template>
@@ -509,6 +704,7 @@
                 قائمة السجلات
               </legend>
               <file-list
+                :can-edit="false"
                 :department="selected.department"
                 @updateList="updateFileList"
               ></file-list>
@@ -522,24 +718,19 @@
         </v-overlay>
         <v-col cols="12">
           <v-btn
-            dark
-            v-if="selected.status === 0"
-            class="me-2"
-            color="green"
-            :loading="saving"
-            :disabled="saving || working"
-            @click="save"
+            color="info"
+            :to="{
+              name: 'WorkGuideAdminView',
+              params: viewParam
+            }"
           >
-            حفظ
-            <v-icon>
-              mdi-content-save
-            </v-icon>
+            عرض
+            <v-icon> mdi-eye-outline </v-icon>
           </v-btn>
           <v-btn
-            dark
-            v-if="selected.status === 0"
-            class="me-2"
-            color="orange darken-2"
+            v-if="selected.status === 0 || selected.status === 15"
+            class="me-2 float-left"
+            color="warning"
             :loading="working"
             :disabled="saving || working"
             @click="sendWorkGuide"
@@ -550,8 +741,25 @@
             </v-icon>
           </v-btn>
           <v-btn
+            v-if="
+              selected.status === 0 ||
+                selected.status === 15 ||
+                (hasFullDepartment && selected.status <= 30)
+            "
+            class="me-2 float-left"
+            color="primary"
+            :loading="saving"
+            :disabled="saving || working"
+            @click="save"
+          >
+            حفظ
+            <v-icon>
+              mdi-content-save
+            </v-icon>
+          </v-btn>
+          <v-btn
             v-if="selected.status === 10 && false"
-            class="me-2"
+            class="me-2 float-left"
             color="green darken-4"
             :loading="saving"
             :disabled="saving"
@@ -564,7 +772,7 @@
           </v-btn>
           <v-btn
             v-if="selected.status === 10 && false"
-            class="me-2"
+            class="me-2 float-left"
             color="orange darken-4"
             :loading="saving"
             :disabled="saving"
@@ -578,7 +786,7 @@
 
           <v-btn
             v-if="selected.status === 20 && false"
-            class="me-2"
+            class="me-2 float-left"
             color="green darken-4"
             :loading="saving"
             :disabled="saving"
@@ -624,7 +832,7 @@
               mdi-content-save
             </v-icon>
           </v-btn>
-          <v-btn dark color="red darken-2" @click="referenceDlg = false">
+          <v-btn dark color="error" @click="referenceDlg = false">
             إلغاء
           </v-btn>
         </v-card-actions>
@@ -672,7 +880,7 @@
               mdi-content-save
             </v-icon>
           </v-btn>
-          <v-btn dark color="red darken-2" @click="definitionDlg = false">
+          <v-btn dark color="error" @click="definitionDlg = false">
             إلغاء
           </v-btn>
         </v-card-actions>
@@ -723,7 +931,7 @@
               mdi-content-save
             </v-icon>
           </v-btn>
-          <v-btn dark color="red darken-2" @click="responsibilityDlg = false">
+          <v-btn dark color="error" @click="responsibilityDlg = false">
             إلغاء
           </v-btn>
         </v-card-actions>
@@ -762,7 +970,7 @@
               mdi-content-save
             </v-icon>
           </v-btn>
-          <v-btn dark color="red darken-2" @click="pointerDlg = false">
+          <v-btn dark color="error" @click="pointerDlg = false">
             إلغاء
           </v-btn>
         </v-card-actions>
@@ -818,7 +1026,7 @@
               mdi-content-save
             </v-icon>
           </v-btn>
-          <v-btn dark color="red darken-2" @click="procedureDlg = false">
+          <v-btn dark color="error" @click="procedureDlg = false">
             إلغاء
           </v-btn>
         </v-card-actions>
@@ -897,18 +1105,34 @@
               mdi-content-save
             </v-icon>
           </v-btn>
-          <v-btn dark color="red darken-2" @click="fileEditDlg = false">
+          <v-btn dark color="error" @click="fileEditDlg = false">
             إلغاء
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="fileListDlg" width="75%">
+    <v-dialog v-model="fileListDlg" width="60%">
       <v-card>
         <v-card-title>
-          الوثائق ذات العلاقة
+          السجلات والوثائق ذات العلاقة
         </v-card-title>
         <v-card-text>
+          <v-row dense class="mb-2">
+            <template v-for="doc in documents">
+              <v-chip
+                :key="doc.id"
+                close
+                close-icon="mdi-plus"
+                color="primary"
+                filter
+                class="me-2"
+                @click:close="addDocumentToProcedure(doc)"
+              >
+                {{ doc.name }}
+              </v-chip>
+            </template>
+          </v-row>
+          <v-divider></v-divider>
           <v-row dense v-show="false">
             <v-col cols="3">
               <v-text-field
@@ -983,7 +1207,7 @@
             </v-col>
           </v-row>
           <template v-for="file in files">
-            <v-row dense :key="file.name">
+            <v-row dense align="center" :key="file.name">
               <v-col cols="3">
                 <span class="procedure-title" v-text="file.name"></span>
               </v-col>
@@ -993,28 +1217,27 @@
               <v-col cols="2">
                 <span v-text="file.issueDate"></span>
               </v-col>
-              <v-col :cols="1">
+              <v-col cols="1">
                 <span v-text="file.version"></span>
               </v-col>
               <v-col cols="2">
-                <v-btn
-                  text
-                  dark
-                  color="green lighten-2"
-                  @click="addFileToProcedure(file)"
-                >
+                <v-btn text color="primary" @click="addFileToProcedure(file)">
                   <v-icon>
-                    mdi-file-replace
+                    mdi-file-plus
                   </v-icon>
                   إضافة
                 </v-btn>
               </v-col>
             </v-row>
+            <v-divider inset></v-divider>
           </template>
         </v-card-text>
         <v-card-actions>
-          <v-btn dark color="red lighten-1" @click="fileListDlg = false">
+          <v-btn text color="error" @click="fileListDlg = false">
             إغلاق
+            <v-icon>
+              mdi-close
+            </v-icon>
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -1032,13 +1255,117 @@
           ></v-textarea>
         </v-card-text>
         <v-card-actions>
-          <v-btn color="green lighten-1">
+          <v-btn color="primary">
             موافق
           </v-btn>
-          <v-btn dark color="red lighten-1">
+          <v-btn dark color="error">
             إلغاء
           </v-btn>
         </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="procRespDlg" width="50%">
+      <v-card>
+        <v-card-title>
+          تحرير مسؤوليات إجراء
+        </v-card-title>
+        <v-card-text>
+          <v-row dense>
+            <v-col cols="2">
+              <v-text-field
+                outlined
+                type="number"
+                label="الترتيب"
+                v-model="selectedProcResp.orderNo"
+                dense
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                dense
+                outlined
+                label="المسؤولية"
+                v-model="selectedProcResp.name"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="1">
+              <v-btn icon color="primary" @click="saveProcResp">
+                <v-icon>mdi-plus</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+
+          <draggable
+            dir="rtl"
+            :list="selectedProcedure.responsibilities"
+            ghost-class="ghost"
+            @change="reOrder(selectedProcedure.responsibilities)"
+          >
+            <transition-group type="transition" :name="'flip-list'">
+              <template v-for="resp in selectedProcedure.responsibilities">
+                <v-row dense :key="resp.id">
+                  <v-col cols="1">
+                    <v-icon color="primary">
+                      mdi-account-tie
+                    </v-icon>
+                  </v-col>
+                  <v-col cols="10">
+                    <span v-text="resp.name"></span>
+                  </v-col>
+                  <v-col cols="1">
+                    <v-btn color="error" icon @click="deleteProcResp(resp)">
+                      <v-icon>
+                        mdi-trash-can
+                      </v-icon>
+                    </v-btn>
+                  </v-col>
+                  <v-divider inset></v-divider>
+                </v-row>
+              </template>
+            </transition-group>
+          </draggable>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn text color="error" @click="procRespDlg = false">
+            إغلاق
+            <v-icon>
+              mdi-close
+            </v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="docsDlg" width="50%" persistent>
+      <v-card>
+        <v-card-title>
+          تحرير وثيقة نصية
+        </v-card-title>
+        <v-card-text>
+          <v-row dense>
+            <v-col cols="10">
+              <v-text-field
+                outlined
+                label="نص الوثيقة"
+                dense
+                v-model="docsName"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="1">
+              <v-btn text color="primary" @click="addDocs">
+                <v-icon>
+                  mdi-plus
+                </v-icon>
+              </v-btn>
+            </v-col>
+            <v-col cols="1">
+              <v-btn text color="error" @click="docsDlg = false">
+                <v-icon>
+                  mdi-close
+                </v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-text>
       </v-card>
     </v-dialog>
   </div>

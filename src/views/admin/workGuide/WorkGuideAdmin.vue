@@ -118,21 +118,35 @@
               outlined
             ></v-select>
           </v-col>
-          <v-col cols="4">
-            <v-btn icon class="float-left">
-              <v-icon>mdi-dots-vertical</v-icon>
-            </v-btn>
+          <v-col cols="1">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
                   icon
+                  color="primary"
+                  @click="loadData"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon>mdi-magnify mdi-36px</v-icon>
+                </v-btn>
+              </template>
+              <span>بحث </span>
+            </v-tooltip>
+          </v-col>
+          <v-col cols="3">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  icon
+                  color="primary"
                   class="float-left"
                   v-bind="attrs"
                   v-on="on"
                   @click="createNew"
                 >
                   <v-icon>
-                    mdi-plus
+                    mdi-plus mdi-36px
                   </v-icon>
                 </v-btn>
               </template>
@@ -142,26 +156,18 @@
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
                   icon
+                  color="primary"
                   class="float-left"
                   v-bind="attrs"
                   v-on="on"
                   @click="duplicate"
                 >
                   <v-icon>
-                    mdi-content-duplicate
+                    mdi-content-duplicate mdi-36px
                   </v-icon>
                 </v-btn>
               </template>
               <span>نسخة جديدة </span>
-            </v-tooltip>
-
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn icon class="float-left" v-bind="attrs" v-on="on">
-                  <v-icon @click="loadData">mdi-magnify</v-icon>
-                </v-btn>
-              </template>
-              <span>بحث </span>
             </v-tooltip>
           </v-col>
         </v-row>
@@ -220,9 +226,9 @@
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
                   v-if="
-                    (item.status === 0 &&
+                    ((item.status === 0 || item.status === 15) &&
                       (item.type === 1 || item.type === 5)) ||
-                      hasFullDepartment
+                      (hasFullDepartment && item.status <= 30 && item.type <= 5)
                   "
                   color="green darken-1"
                   icon
@@ -284,6 +290,28 @@
               </template>
               <span>
                 عرض الأحداث
+              </span>
+            </v-tooltip>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  v-if="
+                    (item.status === 0 || item.status === 15) &&
+                      (item.type === 1 || item.type === 5)
+                  "
+                  color="error"
+                  icon
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="deleteWorkGuide(item)"
+                >
+                  <v-icon>
+                    mdi-trash-can
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>
+                حذف
               </span>
             </v-tooltip>
           </template>
@@ -359,6 +387,32 @@ export default {
     this.loadDepartmentTree()
   },
   methods: {
+    deleteWorkGuide(wg) {
+      this.$confirm('هل تود حذف هذا الدليل').then(res => {
+        if (res) {
+          WorkGuideService.delete(wg)
+            .then(res => {
+              this.loadData()
+              if (res.data.success === true) {
+                this.$toast.success('تم الحذف بنجاح')
+              } else {
+                this.$toast.error('هناك خطأ في عملية الحذف')
+              }
+            })
+            .catch(err => {
+              if (err.response.data.id) {
+                this.$toast.error(
+                  'هناك خطأ في عملية الحذف' +
+                    ' رقم الخطأ ' +
+                    err.response.data.id
+                )
+              } else {
+                this.$toast.error('هناك خطأ في عملية الحذف')
+              }
+            })
+        }
+      })
+    },
     showTransactionDialog(encId) {
       console.log(this.transactionDialog)
       if (encId && encId !== '-1') {

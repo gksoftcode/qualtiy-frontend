@@ -108,10 +108,17 @@
               outlined
             ></v-select>
           </v-col>
-          <v-col cols="4">
-            <v-btn icon class="float-left">
-              <v-icon>mdi-dots-vertical</v-icon>
-            </v-btn>
+          <v-col cols="1">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn icon color="primary" v-bind="attrs" v-on="on">
+                  <v-icon @click="loadData">mdi-magnify mdi-36px</v-icon>
+                </v-btn>
+              </template>
+              <span>بحث </span>
+            </v-tooltip>
+          </v-col>
+          <v-col cols="5">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
@@ -119,22 +126,15 @@
                   class="float-left"
                   v-bind="attrs"
                   v-on="on"
+                  color="primary"
                   @click="createNew"
                 >
                   <v-icon>
-                    mdi-plus
+                    mdi-plus mdi-36px
                   </v-icon>
                 </v-btn>
               </template>
               <span>سجل جديد</span>
-            </v-tooltip>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn icon class="float-left" v-bind="attrs" v-on="on">
-                  <v-icon @click="loadData">mdi-magnify</v-icon>
-                </v-btn>
-              </template>
-              <span>بحث </span>
             </v-tooltip>
           </v-col>
         </v-row>
@@ -268,7 +268,7 @@
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
                   v-show="item.status <= 10"
-                  color="red darken-1"
+                  color="error"
                   icon
                   v-bind="attrs"
                   v-on="on"
@@ -309,7 +309,7 @@
       </v-card-text>
       <v-card-actions> </v-card-actions>
     </v-card>
-    <v-dialog v-model="createDlg" width="80%">
+    <v-dialog persistent v-model="createDlg" width="80%">
       <v-card>
         <v-card-title>
           إنشاء وثيقة جديدة
@@ -559,6 +559,7 @@
           </v-overlay>
           <v-btn
             color="primary"
+            text
             v-show="
               selectedFile.status === 0 ||
                 selectedFile.status === 5 ||
@@ -571,6 +572,7 @@
           </v-btn>
           <v-btn
             color="primary"
+            text
             v-show="
               selectedFile.status === 0 ||
                 selectedFile.status === 5 ||
@@ -582,34 +584,34 @@
             <v-icon>mdi-content-save-move</v-icon>
           </v-btn>
           <v-btn
-            dark
+            text
             v-show="selectedFile.status === 10"
-            color="green darken-1"
+            color="primary"
             @click="updateStatus(20)"
           >
             اعتماد
             <v-icon>mdi-check-bold</v-icon>
           </v-btn>
           <v-btn
-            dark
+            text
             v-show="selectedFile.status === 10"
-            color="orange darken-1"
+            color="warning"
             @click="updateStatus(6)"
           >
             ارجاع
             <v-icon>mdi-replay</v-icon>
           </v-btn>
           <v-btn
-            dark
+            text
             v-show="selectedFile.status === 20"
-            color="orange darken-1"
+            color="warning"
             @click="updateStatus(30)"
           >
             تحويل إلى نسخة قديمة
             <v-icon>mdi-backup-restore</v-icon>
           </v-btn>
           <v-btn
-            dark
+            text
             v-show="selectedFile.status === 20"
             color="red darken-1"
             @click="updateStatus(50)"
@@ -619,9 +621,9 @@
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
-            dark
+            text
             class="float-right"
-            color="red darken-1"
+            color="error"
             @click="editDlg = false"
           >
             إغلاق
@@ -630,7 +632,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="transDlg" width="50%">
+    <v-dialog persistent v-model="transDlg" width="50%">
       <v-card>
         <v-card-title>
           استبدال سجل
@@ -682,8 +684,8 @@
         </v-card-text>
         <v-card-actions>
           <v-btn
-            dark
-            color="green darken-1"
+            text
+            color="primary"
             :disabled="selectedOld.length === 0"
             @click="replaceOld"
           >
@@ -692,9 +694,9 @@
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
-            dark
+            text
             class="float-right"
-            color="red darken-1"
+            color="error"
             @click="transDlg = false"
           >
             إغلاق

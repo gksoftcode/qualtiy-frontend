@@ -11,36 +11,45 @@
     <v-card-text v-if="hasAccess">
       <v-card fixed app>
         <v-toolbar dense>
-          <v-app-bar-nav-icon></v-app-bar-nav-icon>
-
-          <v-spacer></v-spacer>
-          <v-text-field placeholder="البحث"></v-text-field>
-          <v-btn icon>
-            <v-icon>mdi-magnify</v-icon>
-          </v-btn>
-          <v-spacer></v-spacer>
-
-          <v-btn :disabled="disableAdd" @click="createNewDepartment" icon>
+          <v-btn
+            v-tooltip="'إدارة جديدة'"
+            :disabled="disableAdd"
+            @click="createNewDepartment"
+            icon
+          >
             <v-icon>mdi-plus</v-icon>
           </v-btn>
-          <v-btn :disabled="disableAdd" @click="showEmployeeSelector" icon>
+          <v-btn
+            v-tooltip="'تحديد المدير'"
+            :disabled="disableAdd"
+            @click="showEmployeeSelector"
+            icon
+          >
             <v-icon>mdi-account-tie-outline</v-icon>
           </v-btn>
-          <v-btn :disabled="disableAdd" @click="editDepartmentFn" icon>
+          <v-btn
+            v-tooltip="'تحرير'"
+            :disabled="disableAdd"
+            @click="editDepartmentFn"
+            icon
+          >
             <v-icon> mdi-square-edit-outline</v-icon>
           </v-btn>
-          <v-btn :disabled="disableAdd || isLeaf" @click="orderDlg = true" icon>
+          <v-btn
+            v-tooltip="'ترتيب الادارات'"
+            :disabled="disableAdd || isLeaf"
+            @click="orderDlg = true"
+            icon
+          >
             <v-icon> mdi-order-numeric-ascending</v-icon>
           </v-btn>
           <v-btn
+            v-tooltip="'حذف'"
             :disabled="disableAdd || !isLeaf"
             @click="deleteDepartment"
             icon
           >
             <v-icon>mdi-delete</v-icon>
-          </v-btn>
-          <v-btn icon>
-            <v-icon>mdi-dots-vertical</v-icon>
           </v-btn>
         </v-toolbar>
       </v-card>
@@ -151,13 +160,14 @@
           <v-card-actions dense>
             <v-spacer></v-spacer>
             <v-btn
+              text
               color="primary"
               :loading="saving"
               :disabled="saving"
               @click="save()"
               >حفظ</v-btn
             >
-            <v-btn @click="close">اغلاق</v-btn>
+            <v-btn text color="error" @click="close">اغلاق</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -404,13 +414,22 @@ export default {
         DepartmentService.save(this.editDepartment)
           .then(response => {
             this.saving = false
+            this.currentSelected = response.data
             this.loadTree()
             this.close()
-            // this.currentSelected.departmentList.push(respose.data.created)
-            // console.log(respose.data.created)
+            this.$toast.success('تم الحفظ بنجاح')
           })
           .catch(error => {
             this.saving = false
+            if (error.response.data.id) {
+              this.$toast.error(
+                'هناك خطأ في عملية الحفظ' +
+                  ' رقم الخطأ ' +
+                  error.response.data.id
+              )
+            } else {
+              this.$toast.error('هناك خطأ في عملية الحفظ')
+            }
           })
       }
     },

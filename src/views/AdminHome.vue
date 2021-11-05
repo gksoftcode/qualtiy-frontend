@@ -75,7 +75,7 @@
       <v-spacer />
 
       <v-btn icon :to="{ name: 'Landing' }">
-        <v-icon>mdi-apps</v-icon>
+        <v-icon>mdi-home</v-icon>
       </v-btn>
       <v-btn icon>
         <v-icon>mdi-bell</v-icon>
@@ -247,6 +247,11 @@ export default {
         to: '/admin/department'
       },
       {
+        icon: 'mdi-script-text',
+        text: 'الوثائق',
+        to: '/admin/document'
+      },
+      {
         icon: 'mdi-notebook-multiple mdi-flip-h',
         text: 'إدارة الإجراءات',
         to: '/admin/workGuideAdmin'
@@ -258,12 +263,12 @@ export default {
       },
       {
         icon: 'mdi-book-check',
-        text: 'تقارير التدقيق',
+        text: 'خطة التدقيق',
         to: { name: 'AuditReportSearch' }
       },
       {
         icon: 'mdi-calendar-multiple-check',
-        text: 'خطة التدقيق',
+        text: 'جدول التدقيق',
         to: '/admin/auditPlan'
       },
       {

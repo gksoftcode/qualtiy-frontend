@@ -15,5 +15,6 @@ export const Paths = {
   AUDIT_PLAN_PATH: 'api/audit_plan',
   PERMISSION_PATH: 'api/permission',
   BUG_PATH: 'api/exception_log',
-  AUDIT_REPORT_PATH: 'api/auditReport'
+  AUDIT_REPORT_PATH: 'api/auditReport',
+  DOCUMENT_PATH: 'api/document'
 }

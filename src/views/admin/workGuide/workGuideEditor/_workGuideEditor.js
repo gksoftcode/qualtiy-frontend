@@ -7,6 +7,8 @@ import draggable from 'vuedraggable'
 import FileList from '@/components/FileList'
 import _ from 'lodash'
 import Vue from 'vue'
+import DocumentService from '@/service/documents/DocumentService'
+import { mapState } from 'vuex'
 export default {
   name: 'WorkGuideEditor',
   mounted() {
@@ -44,6 +46,11 @@ export default {
 
   data() {
     return {
+      docsDlg: false,
+      docsName: '',
+      procRespId: -1,
+      procRespDlg: false,
+      documents: [],
       selectedDepartmentId: this.departmentEncId,
       saving: false,
       working: false,
@@ -96,6 +103,8 @@ export default {
       },
       responsibilityId: -1,
       responsibilityDlg: false,
+      emptyProcResp: { id: null, name: '', orderNo: 0, encId: '-1' },
+      selectedProcResp: {},
       selectedProcedure: {},
       emptyProcedure: {
         id: null,
@@ -104,7 +113,8 @@ export default {
         orderNo: '',
         period: '',
         encId: '-1',
-        steps: []
+        steps: [],
+        responsibilities: []
       },
       procedureDlg: false,
       procedureId: -1,
@@ -124,7 +134,9 @@ export default {
         val8: false,
         val9: false,
         encId: '-1',
-        proc: {}
+        proc: {},
+        documentTypes: [],
+        docs: []
       },
       stepDlg: false,
       fileData: {},
@@ -150,6 +162,12 @@ export default {
   },
 
   computed: {
+    viewParam: function() {
+      return {
+        encId: this.objectId,
+        viewType: '1'
+      }
+    },
     Constants: function() {
       return Vue.Constants
     },
@@ -162,6 +180,24 @@ export default {
       } else {
         return ''
       }
+    },
+    hasFullDepartment: function() {
+      let ha = false
+      try {
+        this.employee.roles.forEach(item => {
+          if (
+            item === 'ROLE_QUALITY' ||
+            item === 'ROLE_QUALITY_USER' ||
+            item === 'ROLE_ADMIN' ||
+            item === 'ROLE_MANAGER'
+          ) {
+            ha = true
+          }
+        })
+      } catch (e) {
+        return false
+      }
+      return ha
     },
     attachmentPath: function() {
       return Paths.BASE_URL + Paths.FILE_UPLOAD_PATH + '/getAttachment/'
@@ -223,16 +259,141 @@ export default {
       })
 
       return arr
-    }
+    },
+    procedureHeader1: function() {
+      let arr = []
+      arr.push({
+        text: 'مسلسل',
+        value: 'orderNo',
+        align: 'center',
+        sortable: false,
+        width: '5%'
+      })
+      arr.push({
+        text: 'وصف الخطوة',
+        value: 'description',
+        align: 'center',
+        sortable: false,
+        filterable: true,
+        width: '40%'
+      })
+      return arr
+    },
+    procedureHeader2: function() {
+      let arr = []
+      arr.push({
+        text: 'الملاحظات',
+        value: 'remarks',
+        align: 'center',
+        sortable: false,
+        filterable: true,
+        width: '15%'
+      })
+      arr.push({
+        text: 'الوثائق ذات العلاقة',
+        value: 'files',
+        align: 'center',
+        sortable: false,
+        filterable: false,
+        width: '20%'
+      })
+      arr.push({
+        text: '...',
+        value: 'action',
+        align: 'center',
+        sortable: false,
+        filterable: false,
+        width: '5%'
+      })
+
+      return arr
+    },
+    ...mapState('auth', ['employee'])
   },
 
   watch: {},
 
   created() {
     document.title = this.$route.meta.title
+    DocumentService.listActive().then(res => {
+      this.documents = res.data
+    })
   },
 
   methods: {
+    createDocs(step) {
+      this.selectedStep = step
+      this.docsName = ''
+      this.docsDlg = true
+    },
+    addDocs() {
+      if (this.docsName.trim().length > 0) {
+        this.selectedStep.docs.push(this.docsName)
+        this.docsDlg = false
+      }
+    },
+    removeDocFromStep(doc, step) {
+      let idx = step.docs.indexOf(doc)
+      step.docs.splice(idx, 1)
+    },
+    procedureHeader(proc) {
+      let arr = []
+      arr.push({
+        text: 'مسلسل',
+        value: 'orderNo',
+        align: 'center',
+        sortable: false,
+        width: '5%'
+      })
+      arr.push({
+        text: 'وصف الخطوة',
+        value: 'description',
+        align: 'center',
+        sortable: false,
+        filterable: true,
+        width: '40%'
+      })
+      if (proc.responsibilities) {
+        let x = 1
+        proc.responsibilities.forEach(resp => {
+          arr.push({
+            text: resp.name,
+            value: 'val' + x++,
+            align: 'center',
+            sortable: false,
+            filterable: true,
+            width: '5%'
+            // class: 'header-procedure-responsibility'
+          })
+        })
+      }
+      arr.push({
+        text: 'الملاحظات',
+        value: 'remarks',
+        align: 'center',
+        sortable: false,
+        filterable: true,
+        width: '15%'
+      })
+      arr.push({
+        text: 'الوثائق ذات العلاقة',
+        value: 'files',
+        align: 'center',
+        sortable: false,
+        filterable: false,
+        width: '20%'
+      })
+      arr.push({
+        text: '...',
+        value: 'action',
+        align: 'center',
+        sortable: false,
+        filterable: false,
+        width: '5%'
+      })
+
+      return arr
+    },
     save() {
       this.saving = true
       WorkGuideService.save(this.selected)
@@ -274,6 +435,7 @@ export default {
         })
     },
     getOne() {
+      this.loading = true
       WorkGuideService.getOne(this.objectId)
         .then(response => {
           this.selected = response.data
@@ -400,7 +562,7 @@ export default {
       this.responsibilityDlg = true
     },
     createNewProcedure() {
-      this.selectedProcedure = Object.assign({}, this.emptyProcedure)
+      this.selectedProcedure = _.cloneDeep(this.emptyProcedure)
       this.selectedProcedure.steps = []
       this.selectedProcedure.id = this.procedureId--
       if (this.selected.procedures.length > 0) {
@@ -441,7 +603,7 @@ export default {
     },
     createNewStep(proc) {
       if (proc.steps == null) proc.steps = []
-      this.selectedStep = Object.assign({}, this.emptyStep)
+      this.selectedStep = _.cloneDeep(this.emptyStep)
       this.selectedStep.orderNo = proc.steps.length + 1
       proc.steps.push(this.selectedStep)
     },
@@ -466,16 +628,30 @@ export default {
       this.selected.fileList.splice(idx, 1)
     },
     addFileToProcedure(file) {
-      let idx = this.selectedStep.files.indexOf(file)
-      if (idx >= 0) return
       if (this.selectedStep.files == null) {
         this.selectedStep.files = []
       }
+      let idx = this.selectedStep.files.filter(fl => fl.id === file.id).length
+      if (idx > 0) return
       this.selectedStep.files.push(file)
+    },
+    addDocumentToProcedure(doc) {
+      if (this.selectedStep.documentTypes == null) {
+        this.selectedStep.documentTypes = []
+      }
+      debugger
+      let idx = this.selectedStep.documentTypes.filter(dc => dc.id === doc.id)
+        .length
+      if (idx > 0) return
+      this.selectedStep.documentTypes.push(doc)
     },
     removeFileFromStep(file, step) {
       let idx = step.files.indexOf(file)
       step.files.splice(idx, 1)
+    },
+    removeDocumentFromStep(doc, step) {
+      let idx = step.documentTypes.indexOf(doc)
+      step.documentTypes.splice(idx, 1)
     },
     addTempFileToProcedure(file, step) {
       if (step.fileList == null) {
@@ -493,6 +669,36 @@ export default {
         this.selected.pointers.push(this.selectedPointer)
       }
       this.pointerDlg = false
+    },
+    manageProsResp(proc) {
+      this.selectedProcedure = proc
+      this.creatNewProcResp()
+      this.procRespDlg = true
+    },
+    creatNewProcResp() {
+      this.selectedProcResp = Object.assign({}, this.emptyProcResp)
+      this.selectedProcResp.orderNo = this.selectedProcedure.responsibilities
+        ? this.selectedProcedure.responsibilities.length + 1
+        : 1
+      this.selectedProcResp.id = this.procRespId--
+    },
+    saveProcResp() {
+      let idx = this.selectedProcedure.responsibilities.findIndex(
+        item => this.selectedProcResp.id === item.id
+      )
+      if (idx >= 0) {
+        this.selectedProcedure.responsibilities[idx] = Object.assign(
+          {},
+          this.selectedProcResp
+        )
+      } else {
+        this.selectedProcedure.responsibilities.push(this.selectedProcResp)
+      }
+      this.creatNewProcResp()
+    },
+    deleteProcResp(resp) {
+      let idx = this.selectedProcedure.responsibilities.indexOf(resp)
+      this.selectedProcedure.responsibilities.splice(idx, 1)
     },
     createNewPointer() {
       this.selectedPointer = Object.assign({}, this.emptyPointer)

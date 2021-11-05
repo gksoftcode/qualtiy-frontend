@@ -6,7 +6,7 @@
           <v-icon>
             mdi-calendar-multiple-check mdi-24px
           </v-icon>
-          <v-toolbar-title>إدارة خطة التدقيق</v-toolbar-title>
+          <v-toolbar-title>جداول التدقيق</v-toolbar-title>
         </v-toolbar-items>
       </v-card-title>
       <v-card-subtitle class="mt-0" v-if="hasAccess">

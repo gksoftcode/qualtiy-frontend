@@ -1,48 +1,63 @@
 <template>
   <v-card elevation="2" class="custom-heading">
     <v-card-title>
-      <v-toolbar dense>
-        <v-app-bar-nav-icon></v-app-bar-nav-icon>
+      <v-toolbar-items>
+        <v-icon>
+          mdi-key-outline mdi-24px
+        </v-icon>
         <v-toolbar-title>إدارة الأحقيات</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-autocomplete
-          class="ml-2"
-          :items="employees"
-          item-text="fullName"
-          item-value="encId"
-          v-model="selectedEmployee"
-          dense
-          clearable
-          :loading="loadingEmployee"
-          label="الموظف"
-          return-object
-        ></v-autocomplete>
-        <v-select
-          :items="roles"
-          item-text="arabicName"
-          item-value="encId"
-          v-model="selectedRole"
-          dense
-          clearable
-          label="الأحقية"
-          return-object
-        >
-        </v-select>
-        <v-btn icon>
-          <v-icon @click="loadData">mdi-magnify</v-icon>
-        </v-btn>
-        <v-spacer></v-spacer>
-        <v-btn icon @click="addPermissionToEmployee">
-          <v-icon>
-            mdi-plus
-          </v-icon>
-        </v-btn>
-        <v-btn icon>
-          <v-icon>mdi-dots-vertical</v-icon>
-        </v-btn>
-      </v-toolbar>
+      </v-toolbar-items>
     </v-card-title>
-    <v-card-text>
+
+    <v-card-text v-if="hasAccess">
+      <v-row dense>
+        <v-col cols="4">
+          <v-autocomplete
+            outlined
+            class="ml-2"
+            :items="employees"
+            item-text="fullName"
+            item-value="encId"
+            v-model="selectedEmployee"
+            dense
+            clearable
+            :loading="loadingEmployee"
+            label="الموظف"
+            return-object
+          ></v-autocomplete>
+        </v-col>
+        <v-col cols="4">
+          <v-select
+            outlined
+            :items="roles"
+            item-text="arabicName"
+            item-value="encId"
+            v-model="selectedRole"
+            dense
+            clearable
+            label="الأحقية"
+            return-object
+          >
+          </v-select>
+        </v-col>
+        <v-col cols="1">
+          <v-btn color="primary" icon @click="loadData">
+            <v-icon>mdi-magnify mdi-36px</v-icon>
+          </v-btn>
+        </v-col>
+        <v-col cols="3">
+          <v-btn
+            color="primary"
+            class="float-left"
+            icon
+            @click="addPermissionToEmployee"
+          >
+            <v-icon>
+              mdi-plus mdi-36px
+            </v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
       <v-data-table
         :headers="mainHeader"
         :items="tableResponse.data"
@@ -79,7 +94,9 @@
         </template>
       </v-data-table>
     </v-card-text>
-    <v-card-actions> </v-card-actions>
+    <v-card-text>
+      <error401 v-if="!hasAccess"></error401>
+    </v-card-text>
   </v-card>
 </template>
 
@@ -88,8 +105,10 @@ import PermissionService from '@/service/Permission/PermissionService'
 import DataTableRequest from '@/model/request/DataTableRequest'
 import DataTableResponse from '@/model/response/DataTableResponse'
 import EmployeeService from '@/service/employee/EmployeeService'
+import Error401 from '@/components/Error401'
 import { mapState } from 'vuex'
 export default {
+  components: { Error401 },
   created() {
     this.dataTableRequest.data.textSearch = ''
     document.title = this.$route.meta.title
@@ -99,6 +118,23 @@ export default {
     this.loadEmployee()
   },
   computed: {
+    hasAccess: function() {
+      let ha = false
+      try {
+        this.employee.roles.forEach(item => {
+          if (
+            item === 'ROLE_QUALITY' ||
+            item === 'ROLE_ADMIN' ||
+            item === 'ROLE_MANAGER'
+          ) {
+            ha = true
+          }
+        })
+      } catch (e) {
+        return false
+      }
+      return ha
+    },
     ...mapState('auth', ['employee'])
   },
   methods: {
@@ -191,7 +227,6 @@ export default {
         value:
           this.selectedEmployee == null ? null : this.selectedEmployee.encId
       })
-      console.log(this.selectedEmployee)
       PermissionService.listEmployeeByPermission(
         this.dataTableRequest,
         this.selectedRole == null ? -1 : this.selectedRole.encId
@@ -209,7 +244,6 @@ export default {
   watch: {
     dataTableOptions: {
       handler(newVal, oldVal) {
-        console.log(newVal)
         this.loadData()
       },
       deep: true

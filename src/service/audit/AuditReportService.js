@@ -164,12 +164,12 @@ export default {
       { headers: authHeader() }
     )
   },
-  updateStatus: async (planId, status, remarksTxt) => {
+  updateStatus: async (reportId, status, remarksTxt) => {
     return await axios.post(
       Paths.BASE_URL +
         Paths.AUDIT_REPORT_PATH +
         '/updateStatus/' +
-        planId +
+        reportId +
         '/' +
         status,
       { key: 'remarks', value: remarksTxt },

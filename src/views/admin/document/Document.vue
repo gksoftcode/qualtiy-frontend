@@ -4,9 +4,9 @@
       <v-card-title>
         <v-toolbar-items>
           <v-icon>
-            mdi-briefcase-account mdi-24px
+            mdi-script-text mdi-24px
           </v-icon>
-          <v-toolbar-title>إدارة الوظائف</v-toolbar-title>
+          <v-toolbar-title>إدارة الوثائق</v-toolbar-title>
         </v-toolbar-items>
       </v-card-title>
       <v-card-text v-if="hasAccess">
@@ -21,7 +21,7 @@
             ></v-text-field>
           </v-col>
           <v-col cols="1">
-            <v-btn color="primary" icon @click="loadData">
+            <v-btn color="primary" @click="loadData" icon>
               <v-icon>mdi-magnify mdi-36px</v-icon>
             </v-btn>
           </v-col>
@@ -70,9 +70,6 @@
               mdi-bookmark-remove
             </v-icon>
           </template>
-          <template v-slot:item.jobType="{ item }">
-            {{ jobTypes[item.jobType - 1].name }}
-          </template>
           <template v-slot:item.action="{ item }">
             <v-btn color="primary" icon @click="edit(item)">
               <v-icon>
@@ -82,6 +79,7 @@
           </template>
         </v-data-table>
       </v-card-text>
+
       <v-card-text>
         <error401 v-if="!hasAccess"></error401>
       </v-card-text>
@@ -89,58 +87,40 @@
         <v-dialog dir="rtl" v-model="showDialog" width="60%">
           <v-card>
             <v-card-title>
-              تحرير وظيفة جديدة
+              تحرير وثيقة
             </v-card-title>
             <v-card-text>
               <ValidationObserver ref="validator">
                 <v-row dense>
                   <v-col cols="6">
                     <ValidationProvider
-                      name="اسم الوظيفة"
+                      name="اسم الوثيقة"
                       v-slot="{ errors }"
                       rules="required"
                     >
                       <v-text-field
-                        label="اسم الوظيفة"
+                        label="اسم الوثيقة"
                         dense
                         :error-messages="errors"
                         outlined
-                        v-model="selectedJob.name"
+                        v-model="selectedDocument.name"
                       ></v-text-field
                     ></ValidationProvider>
-                  </v-col>
-                  <v-col cols="6">
-                    <ValidationProvider
-                      name="نوع الوظيفة"
-                      v-slot="{ errors }"
-                      rules="required"
-                    >
-                      <v-select
-                        label="نوع الوظيفة"
-                        dense
-                        clearable
-                        :items="jobTypes"
-                        item-text="name"
-                        item-value="id"
-                        :error-messages="errors"
-                        outlined
-                        v-model="selectedJob.jobType"
-                      ></v-select>
-                    </ValidationProvider>
                   </v-col>
                 </v-row>
               </ValidationObserver>
               <v-row dense>
                 <v-col cols="6">
                   <v-switch
-                    v-model="selectedJob.active"
-                    :label="selectedJob.active ? 'فعال' : 'غير فعال'"
+                    v-model="selectedDocument.active"
+                    :label="selectedDocument.active ? 'فعال' : 'غير فعال'"
                   >
                   </v-switch></v-col
               ></v-row>
             </v-card-text>
             <v-card-actions>
               <v-btn
+                text
                 :loading="saving"
                 :disabled="saving"
                 color="primary"
@@ -151,7 +131,7 @@
                   mdi-content-save
                 </v-icon>
               </v-btn>
-              <v-btn color="red" @click="showDialog = false">
+              <v-btn text color="error" @click="showDialog = false">
                 إلغاء
                 <v-icon>
                   mdi-close
@@ -168,11 +148,11 @@
 
 <script>
 import _ from 'lodash'
-import JobService from '@/service/jobs/JobService'
 import DataTableRequest from '@/model/request/DataTableRequest'
 import DataTableResponse from '@/model/response/DataTableResponse'
 import { mapState } from 'vuex'
 import Error401 from '@/components/Error401'
+import DocumentService from '@/service/documents/DocumentService'
 export default {
   components: { Error401 },
   created() {
@@ -212,7 +192,7 @@ export default {
       } else {
         this.dataTableRequest.sortDesc = false
       }
-      JobService.list(this.dataTableRequest)
+      DocumentService.list(this.dataTableRequest)
         .then(response => {
           this.tableResponse = response.data
           this.loading = false
@@ -231,17 +211,17 @@ export default {
       this.$refs.validator.validate().then(result => {
         if (result) {
           this.saving = true
-          let enc_id = this.selectedJob.encId
-          JobService.save(this.selectedJob)
+          let enc_id = this.selectedDocument.encId
+          DocumentService.save(this.selectedDocument)
             .then(response => {
-              this.selectedJob = response.data
+              this.selectedDocument = response.data
               if (enc_id === -1) {
-                this.tableResponse.data.splice(0, 0, this.selectedJob)
+                this.tableResponse.data.splice(0, 0, this.selectedDocument)
               } else {
                 let idx = _.findIndex(this.tableResponse.data, function(o) {
                   return enc_id === o.encId
                 })
-                this.tableResponse.data.splice(idx, 1, this.selectedJob)
+                this.tableResponse.data.splice(idx, 1, this.selectedDocument)
               }
               this.showDialog = false
               this.saving = false
@@ -257,11 +237,11 @@ export default {
 
     creatNew() {
       this.showDialog = true
-      this.selectedJob = Object.assign({}, this.emptyJob)
+      this.selectedDocument = Object.assign({}, this.emptyJob)
     },
     edit(item) {
       this.showDialog = true
-      this.selectedJob = Object.assign({}, item)
+      this.selectedDocument = Object.assign({}, item)
     }
   },
   watch: {
@@ -275,13 +255,8 @@ export default {
   data() {
     return {
       permissionError: false,
-      jobTypes: [
-        { id: 1, name: 'إشرافي' },
-        { id: 2, name: 'تنفيذي' },
-        { id: 3, name: 'عامل' }
-      ],
       showDialog: false,
-      selectedJob: {},
+      selectedDocument: {},
       saving: false,
       emptyJob: { id: -1, name: '', active: true, encId: -1, jobType: 0 },
       loading: false,
@@ -297,20 +272,12 @@ export default {
           width: '10%'
         },
         {
-          text: 'مسمى الوظيفة',
+          text: 'اسم الوثيقة',
           value: 'name',
           align: 'center',
           sortable: true,
           filterable: true,
           width: '55%'
-        },
-        {
-          text: 'نوع الوظيفة',
-          value: 'jobType',
-          align: 'center',
-          sortable: true,
-          filterable: true,
-          width: '15%'
         },
         {
           text: 'الحالة',

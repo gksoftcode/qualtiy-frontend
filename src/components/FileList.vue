@@ -158,7 +158,6 @@ export default {
   },
   mounted() {
     this.loadFileList()
-    console.log('can Edit = ' + this.canEdit)
   },
   computed: {
     attachmentPath: function() {

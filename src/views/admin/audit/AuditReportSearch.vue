@@ -6,7 +6,7 @@
           <v-icon>
             mdi-book-check mdi-24px
           </v-icon>
-          <v-toolbar-title>إدارة تقارير التدقيق</v-toolbar-title>
+          <v-toolbar-title>إدارة خطة التدقيق</v-toolbar-title>
         </v-toolbar-items>
       </v-card-title>
       <v-card-subtitle class="mt-0" v-if="hasAccess">
@@ -33,7 +33,7 @@
           </v-col>
           <v-col cols="2">
             <v-select
-              :items="statusList"
+              :items="reportStatus"
               v-model="statusId"
               item-value="id"
               item-text="name"
@@ -92,10 +92,8 @@
             }}
           </template>
           <template v-slot:item.status="{ item }">
-            <span
-              class="ms-2 text-subtitle-2 accent--text"
-              v-text="status[item.status]"
-            >
+            <span class="ms-2 text-subtitle-2 accent--text">
+              {{ reportStatus.filter(o => o.id === item.status)[0].name }}
             </span>
           </template>
           <template v-slot:item.action="{ item }">
@@ -112,7 +110,7 @@
               </v-icon>
             </v-btn>
             <v-btn
-              v-if="fullAccess"
+              v-if="fullAccess && item.status !== 30"
               color="error"
               icon
               @click="deleteItem(item)"
@@ -271,10 +269,16 @@ export default {
   },
   data() {
     return {
+      reportStatus: [
+        { id: 0, name: 'جديد' },
+        { id: 10, name: 'مرجع' },
+        { id: 20, name: 'مرسل' },
+        { id: 30, name: 'معتمد' }
+      ],
       years: [],
       yearId: moment().year(),
       status: new Map(),
-      statusId: 0,
+      statusId: null,
       empDataSearch: [],
       selectedEmployee: {},
       isLoading: false,
